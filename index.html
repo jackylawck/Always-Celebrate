@@ -50,7 +50,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--card-border);
         }
@@ -89,6 +89,38 @@
             border-radius: 14px;
             padding: 22px;
             margin-bottom: 20px;
+        }
+
+        /* 說明指南區塊 */
+        .guide-box {
+            background: rgba(243, 156, 18, 0.08);
+            border: 1px solid rgba(243, 156, 18, 0.25);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            font-size: 0.88rem;
+        }
+
+        .guide-title {
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .guide-list {
+            padding-left: 18px;
+            color: var(--text-secondary);
+        }
+
+        .guide-list li {
+            margin-bottom: 6px;
+        }
+
+        .guide-list li:last-child {
+            margin-bottom: 0;
         }
 
         .mode-tabs {
@@ -196,8 +228,18 @@
             </div>
         </header>
 
-        <!-- 保險庫解密卡片 -->
+        <!-- 保險庫解密與指南卡片 -->
         <div class="card" id="vault-auth-card">
+            <!-- ℹ️ 使用指南區塊 -->
+            <div class="guide-box">
+                <div class="guide-title" id="txt-guide-title">💡 如何使用「常慶功」？</div>
+                <ul class="guide-list">
+                    <li id="txt-guide-1"><strong>預祝心法：</strong>用「已完成的肯定句」寫下願望（例：「太棒了！我順利完成了專案！」），提前享受成功的喜悅。</li>
+                    <li id="txt-guide-2"><strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密，零數據上雲，徹底隔絕 AI 爬蟲採集。</li>
+                    <li id="txt-guide-3"><strong>請牢記密碼：</strong>主密碼僅存於你的大腦中，若遺失將無法復原內容。</li>
+                </ul>
+            </div>
+
             <input type="password" id="master-password" placeholder="主密碼 Master Password">
             <button class="btn-primary" onclick="unlockVault()" id="btn-unlock">解鎖 Unlock</button>
         </div>
@@ -247,6 +289,10 @@
             zh: {
                 appTitle: "常慶功 Always Celebrate",
                 appSlogan: "經常慶功，就會成功。",
+                guideTitle: "💡 如何使用「常慶功」？",
+                guide1: "<strong>預祝心法：</strong>用「已完成的肯定句」寫下願望（例：「太棒了！我順利完成了專案！」），提前享受成功的喜悅。",
+                guide2: "<strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密，零數據上雲，徹底隔絕 AI 爬蟲採集。",
+                guide3: "<strong>請牢記密碼：</strong>主密碼僅存於你的大腦中，若遺失將無法復原內容。",
                 tabQuick: "✨ 30秒快祝",
                 tabFlip: "🧱 逆境轉化",
                 tabFuture: "✉️ 未來信",
@@ -261,6 +307,10 @@
             en: {
                 appTitle: "Always Celebrate",
                 appSlogan: "Celebrate today, succeed tomorrow.",
+                guideTitle: "💡 How to use Always Celebrate?",
+                guide1: "<strong>Pre-Celebration Mindset:</strong> Write goals as <em>already achieved</em> (e.g., 'Thrilled that I passed the exam!').",
+                guide2: "<strong>Zero-Knowledge Privacy:</strong> AES-GCM 256-bit local encryption. Zero cloud storage, immune to AI scraping.",
+                guide3: "<strong>Remember Your Password:</strong> Exists only in your memory. Lost passwords cannot be recovered.",
                 tabQuick: "✨ Quick Wish",
                 tabFlip: "🧱 Crisis Flip",
                 tabFuture: "✉️ Future Capsule",
@@ -282,6 +332,10 @@
             const t = i18nData[lang];
             document.getElementById('txt-app-title').innerText = t.appTitle;
             document.getElementById('txt-app-slogan').innerText = t.appSlogan;
+            document.getElementById('txt-guide-title').innerHTML = t.guideTitle;
+            document.getElementById('txt-guide-1').innerHTML = t.guide1;
+            document.getElementById('txt-guide-2').innerHTML = t.guide2;
+            document.getElementById('txt-guide-3').innerHTML = t.guide3;
             document.getElementById('tab-quick').innerText = t.tabQuick;
             document.getElementById('tab-flip').innerText = t.tabFlip;
             document.getElementById('tab-future').innerText = t.tabFuture;
