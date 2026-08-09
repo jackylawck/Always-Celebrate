@@ -25,6 +25,7 @@
             --card-border: #2c3e50;
             --accent-gold: #f39c12;
             --accent-gold-hover: #d35400;
+            --danger-color: #e74c3c;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --input-bg: #070a12;
@@ -91,7 +92,6 @@
             margin-bottom: 20px;
         }
 
-        /* 說明指南區塊 */
         .guide-box {
             background: rgba(243, 156, 18, 0.08);
             border: 1px solid rgba(243, 156, 18, 0.25);
@@ -101,27 +101,9 @@
             font-size: 0.88rem;
         }
 
-        .guide-title {
-            font-weight: 600;
-            color: var(--accent-gold);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .guide-list {
-            padding-left: 18px;
-            color: var(--text-secondary);
-        }
-
-        .guide-list li {
-            margin-bottom: 6px;
-        }
-
-        .guide-list li:last-child {
-            margin-bottom: 0;
-        }
+        .guide-title { font-weight: 600; color: var(--accent-gold); margin-bottom: 8px; }
+        .guide-list { padding-left: 18px; color: var(--text-secondary); }
+        .guide-list li { margin-bottom: 6px; }
 
         .mode-tabs {
             display: flex;
@@ -167,6 +149,22 @@
         input:focus, textarea:focus, select:focus { border-color: var(--accent-gold); }
         textarea { resize: vertical; min-height: 100px; }
 
+        /* 密碼強度計 UI */
+        .strength-bar-wrapper {
+            height: 4px;
+            background: var(--input-bg);
+            border-radius: 2px;
+            margin-top: -8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+
         .btn-primary {
             background: var(--accent-gold);
             color: #ffffff;
@@ -181,6 +179,39 @@
         }
 
         .btn-primary:hover { background: var(--accent-gold-hover); }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover { background: #334155; }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .status-text { font-size: 0.85rem; color: #2ecc71; font-weight: 600; }
+
+        .backup-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--card-border);
+        }
 
         .saved-list {
             margin-top: 15px;
@@ -230,22 +261,31 @@
 
         <!-- 保險庫解密與指南卡片 -->
         <div class="card" id="vault-auth-card">
-            <!-- ℹ️ 使用指南區塊 -->
             <div class="guide-box">
                 <div class="guide-title" id="txt-guide-title">💡 如何使用「常慶功」？</div>
                 <ul class="guide-list">
-                    <li id="txt-guide-1"><strong>預祝心法：</strong>用「已完成的肯定句」寫下願望（例：「太棒了！我順利完成了專案！」），提前享受成功的喜悅。</li>
-                    <li id="txt-guide-2"><strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密，零數據上雲，徹底隔絕 AI 爬蟲採集。</li>
-                    <li id="txt-guide-3"><strong>請牢記密碼：</strong>主密碼僅存於你的大腦中，若遺失將無法復原內容。</li>
+                    <li id="txt-guide-1"><strong>預祝心法：</strong>用「已完成的肯定句」寫下願望，提前享受成功的喜悅。</li>
+                    <li id="txt-guide-2"><strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密 (PBKDF2 60萬次疊代)，零數據上雲。</li>
+                    <li id="txt-guide-3"><strong>請牢記密碼：</strong>主密碼僅存於大腦中，若遺失無法復原。5分鐘無操作將自動鎖定。</li>
                 </ul>
             </div>
 
-            <input type="password" id="master-password" placeholder="主密碼 Master Password">
+            <input type="password" id="master-password" placeholder="主密碼 Master Password" oninput="checkPasswordStrength(this.value)">
+            <div class="strength-bar-wrapper">
+                <div class="strength-bar" id="strength-bar"></div>
+            </div>
+
+            <p id="error-msg" style="color: var(--danger-color); font-size: 0.85rem; margin-top: -8px; margin-bottom: 10px; display: none;"></p>
             <button class="btn-primary" onclick="unlockVault()" id="btn-unlock">解鎖 Unlock</button>
         </div>
 
         <!-- 預祝與書寫區域 -->
         <div class="card" id="writing-hub" style="display: none;">
+            <div class="status-bar">
+                <span class="status-text" id="txt-status-unlocked">🔓 保險庫已解鎖 (5分鐘閒置將自動鎖定)</span>
+                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="lockVault()" id="btn-manual-lock">🔒 立即鎖定 (Esc)</button>
+            </div>
+
             <div class="mode-tabs">
                 <button class="tab-btn active" id="tab-quick" onclick="switchTab('quick')">✨ 30秒快祝</button>
                 <button class="tab-btn" id="tab-flip" onclick="switchTab('flip')">🧱 逆境轉化</button>
@@ -254,7 +294,7 @@
 
             <div id="panel-quick">
                 <input type="text" id="quick-title" placeholder="標題 Title">
-                <textarea id="quick-content" placeholder="太棒了！我已經成功..."></textarea>
+                <textarea id="quick-content" placeholder="太棒了！我已經成功... (Ctrl + Enter 快速保存)"></textarea>
             </div>
 
             <div id="panel-flip" style="display: none;">
@@ -273,54 +313,89 @@
                 <option value="🌿 靜思沉澱">🌿 靜思沉澱 Mindful Reflection</option>
             </select>
 
-            <button class="btn-primary" onclick="saveEntry()" id="btn-save">✨ 加密預祝並慶功</button>
+            <button class="btn-primary" onclick="saveEntry()" id="btn-save">✨ 加密預祝並慶功 (Ctrl+Enter)</button>
             
+            <!-- 🔍 全文檢索列 -->
+            <input type="text" id="search-input" placeholder="🔍 全文搜尋搜尋預祝記錄 Search entries..." style="margin-top: 15px;" oninput="filterEntries(this.value)">
+
+            <!-- 備份與匯入工具 -->
+            <div class="backup-controls">
+                <button class="btn-secondary" style="flex:1;" onclick="exportEncryptedBackup()" id="btn-export">💾 匯出加密備份</button>
+                <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('import-file-input').click()" id="btn-import">📂 匯入備份</button>
+                <input type="file" id="import-file-input" accept=".alwayscelebrate,.json" style="display:none;" onchange="importEncryptedBackup(event)">
+            </div>
+
             <div class="saved-list" id="saved-list"></div>
         </div>
     </div>
 
     <script>
+        // 註冊 Service Worker (PWA 秒開離線快取)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail:', err));
+            });
+        }
+
         let currentLanguage = 'zh';
         let activeTab = 'quick';
         let aesKey = null;
         let memoryEntries = [];
+        let idleTimer = null;
+        let draftInterval = null;
+        let failedAttempts = 0;
+        let lockUntilTime = 0;
+
+        const STORAGE_KEY = "ALWAYS_CELEBRATE_ENCRYPTED_VAULT_V1";
+        const DRAFT_KEY = "ALWAYS_CELEBRATE_DRAFT";
+        const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
         const i18nData = {
             zh: {
                 appTitle: "常慶功 Always Celebrate",
                 appSlogan: "經常慶功，就會成功。",
                 guideTitle: "💡 如何使用「常慶功」？",
-                guide1: "<strong>預祝心法：</strong>用「已完成的肯定句」寫下願望（例：「太棒了！我順利完成了專案！」），提前享受成功的喜悅。",
-                guide2: "<strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密，零數據上雲，徹底隔絕 AI 爬蟲採集。",
-                guide3: "<strong>請牢記密碼：</strong>主密碼僅存於你的大腦中，若遺失將無法復原內容。",
+                guide1: "<strong>預祝心法：</strong>用「已完成的肯定句」寫下願望，提前享受成功的喜悅。",
+                guide2: "<strong>極致資安：</strong>採用 AES-GCM 256-bit 本地加密 (PBKDF2 60萬次疊代)，零數據上雲。",
+                guide3: "<strong>請牢記密碼：</strong>主密碼僅存於大腦中，若遺失無法復原。5分鐘無操作將自動鎖定。",
                 tabQuick: "✨ 30秒快祝",
                 tabFlip: "🧱 逆境轉化",
                 tabFuture: "✉️ 未來信",
                 quickTitleHolder: "標題 Title",
-                quickContentHolder: "太棒了！我已經成功...",
+                quickContentHolder: "太棒了！我已經成功... (Ctrl + Enter 快速保存)",
                 flipObstacleHolder: "目前的挑戰或困擾...",
                 flipReframeHolder: "轉化後的預祝結果...",
                 futureContentHolder: "寫給未來達成目標的自己...",
                 btnUnlock: "解鎖 Unlock",
-                btnSave: "✨ 加密預祝並慶功"
+                btnSave: "✨ 加密預祝並慶功 (Ctrl+Enter)",
+                statusUnlocked: "🔓 保險庫已解鎖 (5分鐘閒置將自動鎖定)",
+                btnManualLock: "🔒 立即鎖定 (Esc)",
+                btnExport: "💾 匯出加密備份",
+                btnImport: "📂 匯入備份",
+                searchHolder: "🔍 搜尋預祝記錄 Search entries..."
             },
             en: {
                 appTitle: "Always Celebrate",
                 appSlogan: "Celebrate today, succeed tomorrow.",
                 guideTitle: "💡 How to use Always Celebrate?",
                 guide1: "<strong>Pre-Celebration Mindset:</strong> Write goals as <em>already achieved</em> (e.g., 'Thrilled that I passed the exam!').",
-                guide2: "<strong>Zero-Knowledge Privacy:</strong> AES-GCM 256-bit local encryption. Zero cloud storage, immune to AI scraping.",
-                guide3: "<strong>Remember Your Password:</strong> Exists only in your memory. Lost passwords cannot be recovered.",
+                guide2: "<strong>Zero-Knowledge Privacy:</strong> AES-GCM 256-bit local encryption (600k PBKDF2 iterations). Zero cloud storage.",
+                guide3: "<strong>Remember Your Password:</strong> Exists only in your memory. Auto-locks after 5 mins of inactivity.",
                 tabQuick: "✨ Quick Wish",
                 tabFlip: "🧱 Crisis Flip",
                 tabFuture: "✉️ Future Capsule",
                 quickTitleHolder: "Title",
-                quickContentHolder: "Thrilled to share that I have successfully achieved...",
+                quickContentHolder: "Thrilled to share that I have successfully achieved... (Ctrl + Enter to save)",
                 flipObstacleHolder: "Current challenge or obstacle...",
                 flipReframeHolder: "Pre-celebrate the resolution...",
                 futureContentHolder: "Write to your future self...",
                 btnUnlock: "Unlock",
-                btnSave: "✨ Encrypt & Celebrate"
+                btnSave: "✨ Encrypt & Celebrate (Ctrl+Enter)",
+                statusUnlocked: "🔓 Vault Unlocked (Auto-locks after 5m idle)",
+                btnManualLock: "🔒 Lock Vault (Esc)",
+                btnExport: "💾 Export Backup",
+                btnImport: "📂 Import Backup",
+                searchHolder: "🔍 Search entries..."
             }
         };
 
@@ -346,6 +421,27 @@
             document.getElementById('future-content').placeholder = t.futureContentHolder;
             document.getElementById('btn-unlock').innerText = t.btnUnlock;
             document.getElementById('btn-save').innerText = t.btnSave;
+            document.getElementById('txt-status-unlocked').innerText = t.statusUnlocked;
+            document.getElementById('btn-manual-lock').innerText = t.btnManualLock;
+            document.getElementById('btn-export').innerText = t.btnExport;
+            document.getElementById('btn-import').innerText = t.btnImport;
+            document.getElementById('search-input').placeholder = t.searchHolder;
+        }
+
+        // 🔒 密碼強度檢測器
+        function checkPasswordStrength(pwd) {
+            const bar = document.getElementById('strength-bar');
+            if (!pwd) { bar.style.width = '0%'; return; }
+            let score = 0;
+            if (pwd.length >= 8) score += 25;
+            if (pwd.length >= 12) score += 25;
+            if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 25;
+            if (/[0-9]/.test(pwd) || /[^A-Za-z0-9]/.test(pwd)) score += 25;
+
+            bar.style.width = score + '%';
+            if (score <= 50) bar.style.background = '#e74c3c';
+            else if (score <= 75) bar.style.background = '#f1c40f';
+            else bar.style.background = '#2ecc71';
         }
 
         function switchTab(tab) {
@@ -365,20 +461,144 @@
                 'raw', encoder.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
             );
             return await crypto.subtle.deriveKey(
-                { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                { name: 'PBKDF2', salt: salt, iterations: 600000, hash: 'SHA-256' },
                 baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
             );
         }
 
+        async function encryptData(payloadObj, key) {
+            const encoder = new TextEncoder();
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const dataBuffer = encoder.encode(JSON.stringify(payloadObj));
+            const encryptedBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, dataBuffer);
+
+            return {
+                iv: Array.from(iv),
+                ciphertext: Array.from(new Uint8Array(encryptedBuffer))
+            };
+        }
+
+        async function decryptData(encryptedObj, key) {
+            const iv = new Uint8Array(encryptedObj.iv);
+            const ciphertext = new Uint8Array(encryptedObj.ciphertext);
+            const decryptedBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ciphertext);
+            return JSON.parse(new TextDecoder().decode(decryptedBuffer));
+        }
+
         async function unlockVault() {
+            const now = Date.now();
+            if (now < lockUntilTime) {
+                showError(`嘗試失敗次數過多，請等待 ${Math.ceil((lockUntilTime - now) / 1000)} 秒後再試。`);
+                return;
+            }
+
             const pwd = document.getElementById('master-password').value;
             if (!pwd) return;
 
-            const salt = new TextEncoder().encode("AlwaysCelebrateSaltKey");
-            aesKey = await deriveKey(pwd, salt);
+            const salt = new TextEncoder().encode("AlwaysCelebrateEnterpriseSalt2026");
+            
+            try {
+                const derivedKey = await deriveKey(pwd, salt);
+                const rawStoredData = localStorage.getItem(STORAGE_KEY);
 
-            document.getElementById('vault-auth-card').style.display = 'none';
-            document.getElementById('writing-hub').style.display = 'block';
+                if (rawStoredData) {
+                    const encryptedObj = JSON.parse(rawStoredData);
+                    memoryEntries = await decryptData(encryptedObj, derivedKey);
+                } else {
+                    memoryEntries = [];
+                }
+
+                aesKey = derivedKey;
+                failedAttempts = 0;
+                hideError();
+
+                document.getElementById('vault-auth-card').style.display = 'none';
+                document.getElementById('writing-hub').style.display = 'block';
+                document.getElementById('master-password').value = '';
+
+                renderEntries();
+                resetIdleTimer();
+                setupIdleListeners();
+                setupShortcuts();
+                checkDraft();
+
+            } catch (err) {
+                failedAttempts++;
+                if (failedAttempts >= 5) {
+                    lockUntilTime = Date.now() + 10000;
+                    showError("連續失敗 5 次，請等待 10 秒後再試。");
+                } else {
+                    showError(`主密碼錯誤！(剩餘嘗試次數: ${5 - failedAttempts})`);
+                }
+            }
+        }
+
+        function lockVault() {
+            aesKey = null;
+            memoryEntries = [];
+            clearTimeout(idleTimer);
+            clearInterval(draftInterval);
+            removeIdleListeners();
+
+            document.getElementById('writing-hub').style.display = 'none';
+            document.getElementById('vault-auth-card').style.display = 'block';
+            document.getElementById('saved-list').innerHTML = '';
+        }
+
+        // ⌨️ 快捷鍵監聽器 (Ctrl+Enter 保存, Esc 鎖定)
+        function setupShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && aesKey) {
+                    lockVault();
+                } else if (e.ctrlKey && e.key === 'Enter' && aesKey) {
+                    saveEntry();
+                }
+            });
+        }
+
+        // ✍️ 草稿自動保存邏輯
+        function checkDraft() {
+            const draft = localStorage.getItem(DRAFT_KEY);
+            if (draft) {
+                const draftObj = JSON.parse(draft);
+                if (confirm("發現上次未儲存的草稿，是否恢復？")) {
+                    document.getElementById('quick-title').value = draftObj.title || '';
+                    document.getElementById('quick-content').value = draftObj.content || '';
+                } else {
+                    localStorage.removeItem(DRAFT_KEY);
+                }
+            }
+
+            // 每 5 秒自動保存草稿
+            draftInterval = setInterval(() => {
+                const title = document.getElementById('quick-title').value;
+                const content = document.getElementById('quick-content').value;
+                if (title || content) {
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, content }));
+                } else {
+                    localStorage.removeItem(DRAFT_KEY);
+                }
+            }, 5000);
+        }
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                lockVault();
+                showError("因超過 5 分鐘無操作，系統已自動鎖定保險庫。");
+            }, IDLE_TIMEOUT_MS);
+        }
+
+        function setupIdleListeners() {
+            window.addEventListener('mousemove', resetIdleTimer);
+            window.addEventListener('keydown', resetIdleTimer);
+            window.addEventListener('click', resetIdleTimer);
+        }
+
+        function removeIdleListeners() {
+            window.removeEventListener('mousemove', resetIdleTimer);
+            window.removeEventListener('keydown', resetIdleTimer);
+            window.removeEventListener('click', resetIdleTimer);
         }
 
         async function saveEntry() {
@@ -399,9 +619,14 @@
             if (!content) return;
 
             const mood = document.getElementById('mood-selector').value;
-            const entryObj = { title, content, mood, timestamp: new Date().toLocaleString() };
+            const entryObj = { id: Date.now(), title, content, mood, timestamp: new Date().toLocaleString() };
 
             memoryEntries.unshift(entryObj);
+
+            const encryptedData = await encryptData(memoryEntries, aesKey);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(encryptedData));
+            localStorage.removeItem(DRAFT_KEY); // 清除已發布的草稿
+
             renderEntries();
             fireConfetti();
 
@@ -412,10 +637,61 @@
             document.getElementById('future-content').value = '';
         }
 
-        function renderEntries() {
+        // 🔍 即時全文過濾器
+        function filterEntries(query) {
+            if (!query) {
+                renderEntries(memoryEntries);
+                return;
+            }
+            const q = query.toLowerCase();
+            const filtered = memoryEntries.filter(item => 
+                (item.title && item.title.toLowerCase().includes(q)) ||
+                (item.content && item.content.toLowerCase().includes(q)) ||
+                (item.mood && item.mood.toLowerCase().includes(q))
+            );
+            renderEntries(filtered);
+        }
+
+        async function exportEncryptedBackup() {
+            if (!aesKey) return;
+            const encryptedData = await encryptData(memoryEntries, aesKey);
+            const blob = new Blob([JSON.stringify(encryptedData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AlwaysCelebrate_Backup_${new Date().toISOString().slice(0,10)}.alwayscelebrate`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function importEncryptedBackup(event) {
+            const file = event.target.files[0];
+            if (!file || !aesKey) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importedObj = JSON.parse(e.target.result);
+                    const importedEntries = await decryptData(importedObj, aesKey);
+                    
+                    memoryEntries = importedEntries;
+                    const encryptedData = await encryptData(memoryEntries, aesKey);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(encryptedData));
+
+                    renderEntries();
+                    alert("🎉 備份還原成功！");
+                } catch (err) {
+                    alert("❌ 備份檔導入失敗：密碼不符或檔案已被篡改。");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderEntries(dataToRender = memoryEntries) {
             const listEl = document.getElementById('saved-list');
             listEl.innerHTML = '';
-            memoryEntries.forEach(item => {
+            dataToRender.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'entry-item';
                 div.innerHTML = `
@@ -427,6 +703,16 @@
                 `;
                 listEl.appendChild(div);
             });
+        }
+
+        function showError(msg) {
+            const errEl = document.getElementById('error-msg');
+            errEl.innerText = msg;
+            errEl.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-msg').style.display = 'none';
         }
 
         function fireConfetti() {
