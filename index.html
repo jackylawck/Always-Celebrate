@@ -149,7 +149,6 @@
         input:focus, textarea:focus, select:focus { border-color: var(--accent-gold); }
         textarea { resize: vertical; min-height: 100px; }
 
-        /* 密碼強度計 UI */
         .strength-bar-wrapper {
             height: 4px;
             background: var(--input-bg);
@@ -316,7 +315,7 @@
             <button class="btn-primary" onclick="saveEntry()" id="btn-save">✨ 加密預祝並慶功 (Ctrl+Enter)</button>
             
             <!-- 🔍 全文檢索列 -->
-            <input type="text" id="search-input" placeholder="🔍 全文搜尋搜尋預祝記錄 Search entries..." style="margin-top: 15px;" oninput="filterEntries(this.value)">
+            <input type="text" id="search-input" placeholder="🔍 全文搜尋預祝記錄 Search entries..." style="margin-top: 15px;" oninput="filterEntries(this.value)">
 
             <!-- 備份與匯入工具 -->
             <div class="backup-controls">
@@ -330,7 +329,7 @@
     </div>
 
     <script>
-        // 註冊 Service Worker (PWA 秒開離線快取)
+        // 註冊 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail:', err));
@@ -347,7 +346,7 @@
         let lockUntilTime = 0;
 
         const STORAGE_KEY = "ALWAYS_CELEBRATE_ENCRYPTED_VAULT_V1";
-        const DRAFT_KEY = "ALWAYS_CELEBRATE_DRAFT";
+        const DRAFT_KEY = "ALWAYS_CELEBRATE_DRAFT_V2";
         const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
         const i18nData = {
@@ -428,7 +427,6 @@
             document.getElementById('search-input').placeholder = t.searchHolder;
         }
 
-        // 🔒 密碼強度檢測器
         function checkPasswordStrength(pwd) {
             const bar = document.getElementById('strength-bar');
             if (!pwd) { bar.style.width = '0%'; return; }
@@ -545,7 +543,6 @@
             document.getElementById('saved-list').innerHTML = '';
         }
 
-        // ⌨️ 快捷鍵監聽器 (Ctrl+Enter 保存, Esc 鎖定)
         function setupShortcuts() {
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && aesKey) {
@@ -556,25 +553,39 @@
             });
         }
 
-        // ✍️ 草稿自動保存邏輯
+        // ✍️ 跨 Tab 全欄位草稿拯救邏輯 (全方位覆蓋)
         function checkDraft() {
             const draft = localStorage.getItem(DRAFT_KEY);
             if (draft) {
-                const draftObj = JSON.parse(draft);
+                const d = JSON.parse(draft);
                 if (confirm("發現上次未儲存的草稿，是否恢復？")) {
-                    document.getElementById('quick-title').value = draftObj.title || '';
-                    document.getElementById('quick-content').value = draftObj.content || '';
+                    if (d.activeTab) switchTab(d.activeTab);
+                    document.getElementById('quick-title').value = d.quickTitle || '';
+                    document.getElementById('quick-content').value = d.quickContent || '';
+                    document.getElementById('flip-obstacle').value = d.flipObstacle || '';
+                    document.getElementById('flip-reframe').value = d.flipReframe || '';
+                    document.getElementById('future-unlock-date').value = d.futureUnlockDate || '';
+                    document.getElementById('future-content').value = d.futureContent || '';
                 } else {
                     localStorage.removeItem(DRAFT_KEY);
                 }
             }
 
-            // 每 5 秒自動保存草稿
+            // 每 5 秒自動暫存全欄位草稿
             draftInterval = setInterval(() => {
-                const title = document.getElementById('quick-title').value;
-                const content = document.getElementById('quick-content').value;
-                if (title || content) {
-                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, content }));
+                const draftObj = {
+                    activeTab: activeTab,
+                    quickTitle: document.getElementById('quick-title').value,
+                    quickContent: document.getElementById('quick-content').value,
+                    flipObstacle: document.getElementById('flip-obstacle').value,
+                    flipReframe: document.getElementById('flip-reframe').value,
+                    futureUnlockDate: document.getElementById('future-unlock-date').value,
+                    futureContent: document.getElementById('future-content').value
+                };
+
+                const hasContent = Object.values(draftObj).some(val => val && val !== activeTab);
+                if (hasContent) {
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify(draftObj));
                 } else {
                     localStorage.removeItem(DRAFT_KEY);
                 }
@@ -625,7 +636,7 @@
 
             const encryptedData = await encryptData(memoryEntries, aesKey);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(encryptedData));
-            localStorage.removeItem(DRAFT_KEY); // 清除已發布的草稿
+            localStorage.removeItem(DRAFT_KEY);
 
             renderEntries();
             fireConfetti();
@@ -637,7 +648,6 @@
             document.getElementById('future-content').value = '';
         }
 
-        // 🔍 即時全文過濾器
         function filterEntries(query) {
             if (!query) {
                 renderEntries(memoryEntries);
@@ -668,6 +678,11 @@
         async function importEncryptedBackup(event) {
             const file = event.target.files[0];
             if (!file || !aesKey) return;
+
+            if (!confirm("匯入備份將會替換現有的記錄，確定要繼續嗎？")) {
+                event.target.value = '';
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = async (e) => {
