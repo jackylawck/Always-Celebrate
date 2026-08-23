@@ -74,7 +74,8 @@ const i18n = {
         searchHolder: "🔍 全文搜尋預祝記錄 Search entries...",
         txtChangePwdTitle: "🔑 變更主密碼 Change Master Password",
         btnConfirmPwdChange: "確認變更並重新加密",
-        btnCancelPwdChange: "取消"
+        btnCancelPwdChange: "取消",
+        txtSkipLink: "跳至主要內容 Skip to main content"
     },
     en: {
         appTitle: "Always Celebrate",
@@ -105,7 +106,8 @@ const i18n = {
         searchHolder: "🔍 Search entries...",
         txtChangePwdTitle: "🔑 Change Master Password",
         btnConfirmPwdChange: "Re-encrypt & Save",
-        btnCancelPwdChange: "Cancel"
+        btnCancelPwdChange: "Cancel",
+        txtSkipLink: "Skip to main content"
     }
 };
 
@@ -539,6 +541,10 @@ function switchTab(tabId) {
 
 function setLanguage(lang) {
     state.currentLanguage = lang;
+    
+    // 🌐 WCAG 規範：同步更新 HTML 根節點 lang 屬性
+    document.documentElement.lang = (lang === 'zh') ? 'zh-HK' : 'en';
+
     document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
     document.getElementById('btn-zh').setAttribute('aria-pressed', (lang === 'zh').toString());
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
@@ -574,6 +580,9 @@ function setLanguage(lang) {
     document.getElementById('txt-change-pwd-title').innerText = t.txtChangePwdTitle;
     document.getElementById('btn-confirm-pwd-change').innerText = t.btnConfirmPwdChange;
     document.getElementById('btn-cancel-pwd-change').innerText = t.btnCancelPwdChange;
+    
+    const skipLink = document.getElementById('txt-skip-link');
+    if (skipLink) skipLink.innerText = t.txtSkipLink;
 }
 
 function showAuthError(msg) {
