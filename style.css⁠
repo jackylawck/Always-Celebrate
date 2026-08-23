@@ -1,10 +1,10 @@
 /**
- * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.0.0 Final)
+ * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.1.0 Textbook Grade)
  * Responsive, Accessible, Print-Ready & Variable-Driven
  */
 
 :root {
-    /* 🎨 色彩變數系統 Color Tokens */
+    /* 🎨 色彩與陰影變數 Tokens */
     --bg-color: #0b0f19;
     --card-bg: #151c2c;
     --card-border: #2c3e50;
@@ -15,6 +15,7 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --input-bg: #070a12;
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.25);
 
     /* 📏 字體尺度 Font Scale */
     --font-xs: 0.75rem;
@@ -25,7 +26,7 @@
     --font-xl: 1.6rem;
     --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 
-    /* 📐 間距與尺寸 Spacing Tokens */
+    /* 📐 間距尺度 Spacing Tokens */
     --space-1: 0.25rem;
     --space-2: 0.5rem;
     --space-3: 0.75rem;
@@ -58,6 +59,25 @@ body {
     display: flex;
     justify-content: center;
     min-height: 100vh;
+}
+
+/* ♿ 鍵盤無障礙跳至主要內容連結 (Skip Link) */
+.skip-link {
+    position: absolute;
+    top: -60px;
+    left: 20px;
+    background: var(--accent-gold);
+    color: #ffffff;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    z-index: 10001;
+    text-decoration: none;
+    font-weight: 600;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 20px;
 }
 
 /* ♿ 無障礙專用隱藏類別 Screen Readers Only */
@@ -134,7 +154,7 @@ body {
     border-radius: var(--radius-lg);
     padding: var(--space-6);
     margin-bottom: var(--space-5);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-card);
 }
 
 /* 說明指南導引盒 Guide Boxes */
@@ -399,6 +419,7 @@ button:disabled, input:disabled {
         color: #000000 !important; 
         padding: 0;
     }
+    .skip-link,
     .lang-switch-group, 
     .status-bar, 
     .backup-controls, 
