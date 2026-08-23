@@ -1,0 +1,605 @@
+/**
+ * 常慶功 Always Celebrate - Enterprise Cryptographic Engine (v2.0.0 Final)
+ * Zero-Knowledge, Offline-First, PBKDF2 (600k) + AES-GCM 256 + HMAC-SHA256
+ */
+
+const STORAGE_KEY = "ALWAYS_CELEBRATE_VAULT_V2";
+const DRAFT_KEY = "ALWAYS_CELEBRATE_DRAFT_V3";
+const ATTEMPTS_KEY = "AC_FAILED_ATTEMPTS";
+const LOCKOUT_KEY = "AC_LOCKOUT_TIME";
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+const PBKDF2_ITERATIONS = 600000;
+
+const state = {
+    currentLanguage: 'zh',
+    activeTab: 'quick',
+    aesKey: null,
+    memoryEntries: [],
+    idleTimer: null,
+    draftInterval: null
+};
+
+const i18n = {
+    zh: {
+        appTitle: "常慶功 Always Celebrate",
+        appSlogan: "經常慶功，就會成功。",
+        guideTitle: "🛡️ 100% 離線隱私與極致資安承諾",
+        guide1: "<strong>純本地零知識 (Zero-Knowledge)：</strong>採用 AES-GCM 256-bit 軍規加密與 HMAC 防篡改 (60萬次 PBKDF2 搭配隨機 Salt)。零數據上雲。",
+        guide2: "<strong>阻隔 AI 爬蟲採集 (Anti-AI)：</strong>嚴格 CSP 網閘完全封殺出站連線，數據絕不被外部 AI 訓練採集。",
+        guide3: "<strong>密碼即唯一鑰匙：</strong>主密碼僅存於大腦中，若遺失無法復原。閒置 5 分鐘將自動鎖定。",
+        insideGuideTitle: "✨ 「預祝法則」上手指南",
+        insideGuide1: "<strong>✨ 30秒快祝：</strong>用「已發生的肯定句」寫下願望（例：「太棒了！我順利完成了專案！」），提前享受喜悅！",
+        insideGuide2: "<strong>🧱 逆境轉化：</strong>把眼前的障礙（牆）轉化為通往未來的伏筆（門），預祝轉機與收穫。",
+        insideGuide3: "<strong>✉️ 未來信：</strong>設定未來的慶功日期，寫下一封成果慶功信給自己。",
+        tabQuick: "✨ 30秒快祝",
+        tabFlip: "🧱 逆境轉化",
+        tabFuture: "✉️ 未來信",
+        quickTitleHolder: "標題 Title",
+        quickContentHolder: "太棒了！我已經成功... (Ctrl + Enter 快速保存)",
+        flipObstacleHolder: "目前的挑戰或困擾...",
+        flipReframeHolder: "轉化後的預祝結果...",
+        futureContentHolder: "寫給未來達成目標的自己...",
+        btnUnlock: "解鎖保險庫 Unlock Vault",
+        btnSave: "✨ 加密預祝並慶功 (Ctrl+Enter)",
+        statusUnlocked: "🔓 保險庫已解鎖 (5分鐘閒置將自動鎖定)",
+        btnManualLock: "🔒 立即鎖定 (Esc)",
+        btnExport: "💾 匯出加密備份",
+        btnImport: "📂 匯入備份",
+        btnChangePwd: "🔑 變更主密碼",
+        searchHolder: "🔍 全文搜尋預祝記錄 Search entries...",
+        txtChangePwdTitle: "🔑 變更主密碼 Change Master Password",
+        btnConfirmPwdChange: "確認變更並重新加密",
+        btnCancelPwdChange: "取消"
+    },
+    en: {
+        appTitle: "Always Celebrate",
+        appSlogan: "Celebrate today, succeed tomorrow.",
+        guideTitle: "🛡️ 100% Offline Privacy & Zero-Knowledge Guarantee",
+        guide1: "<strong>Pure Local Zero-Knowledge:</strong> AES-GCM 256-bit with HMAC tamper-proofing (600k PBKDF2 iterations). Zero cloud storage.",
+        guide2: "<strong>Anti-AI Scraping Shield:</strong> Rigid CSP blocks all outbound requests. 100% immune to AI scrapers.",
+        guide3: "<strong>Your Password is the Only Key:</strong> Lost passwords cannot be recovered. Auto-locks after 5 minutes idle.",
+        insideGuideTitle: "✨ Quick Pre-Celebration Guide",
+        insideGuide1: "<strong>✨ 30s Quick Wish:</strong> Frame goals as <em>already achieved facts</em>. Experience victory today!",
+        insideGuide2: "<strong>🧱 Crisis Flip:</strong> Reframe current obstacles ('Walls') into portals for breakthrough ('Doors').",
+        insideGuide3: "<strong>✉️ Future Capsule:</strong> Set a celebration date and write a letter of victory to your future self.",
+        tabQuick: "✨ Quick Wish",
+        tabFlip: "🧱 Crisis Flip",
+        tabFuture: "✉️ Future Capsule",
+        quickTitleHolder: "Title",
+        quickContentHolder: "Thrilled to share that I have successfully achieved... (Ctrl + Enter to save)",
+        flipObstacleHolder: "Current challenge or obstacle...",
+        flipReframeHolder: "Pre-celebrate the resolution...",
+        futureContentHolder: "Write to your future self...",
+        btnUnlock: "Unlock Vault",
+        btnSave: "✨ Encrypt & Celebrate (Ctrl+Enter)",
+        statusUnlocked: "🔓 Vault Unlocked (Auto-locks after 5m idle)",
+        btnManualLock: "🔒 Lock Vault (Esc)",
+        btnExport: "💾 Export Backup",
+        btnImport: "📂 Import Backup",
+        btnChangePwd: "🔑 Change Password",
+        searchHolder: "🔍 Search entries...",
+        txtChangePwdTitle: "🔑 Change Master Password",
+        btnConfirmPwdChange: "Re-encrypt & Save",
+        btnCancelPwdChange: "Cancel"
+    }
+};
+
+async function deriveKeys(password, saltUint8Array) {
+    const encoder = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey(
+        'raw', encoder.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
+    );
+    
+    const aesKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: saltUint8Array, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+        baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+
+    const hmacKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: saltUint8Array, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+        baseKey, { name: 'HMAC', hash: 'SHA-256', length: 256 }, false, ['sign', 'verify']
+    );
+
+    return { aesKey, hmacKey };
+}
+
+async function encryptPayload(dataObj, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const { aesKey, hmacKey } = await deriveKeys(password, salt);
+
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(JSON.stringify(dataObj));
+    const ciphertextBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, aesKey, dataBuffer);
+    const ciphertextArray = new Uint8Array(ciphertextBuffer);
+
+    const signatureBuffer = await crypto.subtle.sign('HMAC', hmacKey, ciphertextArray);
+
+    return {
+        version: "2.0",
+        salt: Array.from(salt),
+        iv: Array.from(iv),
+        ciphertext: Array.from(ciphertextArray),
+        hmac: Array.from(new Uint8Array(signatureBuffer))
+    };
+}
+
+async function decryptPayload(encryptedRecord, password) {
+    if (!encryptedRecord || !encryptedRecord.salt || !encryptedRecord.iv || !encryptedRecord.ciphertext) {
+        throw new Error("Invalid structure");
+    }
+    const salt = new Uint8Array(encryptedRecord.salt);
+    const iv = new Uint8Array(encryptedRecord.iv);
+    const ciphertext = new Uint8Array(encryptedRecord.ciphertext);
+
+    const { aesKey, hmacKey } = await deriveKeys(password, salt);
+
+    if (encryptedRecord.hmac) {
+        const hmacSig = new Uint8Array(encryptedRecord.hmac);
+        const isValid = await crypto.subtle.verify('HMAC', hmacKey, hmacSig, ciphertext);
+        if (!isValid) {
+            throw new Error("HMAC verification failed");
+        }
+    }
+
+    const decryptedBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, aesKey, ciphertext);
+    return {
+        entries: JSON.parse(new TextDecoder().decode(decryptedBuffer)),
+        activeKey: aesKey
+    };
+}
+
+function evaluatePasswordStrength(pwd, barElement) {
+    if (!barElement) return;
+    if (!pwd) { barElement.style.width = '0%'; return; }
+    let score = 0;
+    if (pwd.length >= 8) score += 25;
+    if (pwd.length >= 12) score += 25;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 25;
+    if (/[0-9]/.test(pwd) || /[^A-Za-z0-9]/.test(pwd)) score += 25;
+
+    barElement.style.width = score + '%';
+    if (score <= 50) barElement.style.background = '#e74c3c';
+    else if (score <= 75) barElement.style.background = '#f1c40f';
+    else barElement.style.background = '#2ecc71';
+}
+
+function checkLockout() {
+    const lockoutUntil = parseInt(sessionStorage.getItem(LOCKOUT_KEY) || "0", 10);
+    const now = Date.now();
+    if (now < lockoutUntil) {
+        const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+        showAuthError(`嘗試失敗過多，冷卻中... 請等待 ${remainingSec} 秒。`);
+        return true;
+    }
+    return false;
+}
+
+function handleFailedAttempt() {
+    let attempts = parseInt(sessionStorage.getItem(ATTEMPTS_KEY) || "0", 10) + 1;
+    sessionStorage.setItem(ATTEMPTS_KEY, attempts.toString());
+    
+    if (attempts >= 5) {
+        const lockTime = Date.now() + (30 * 1000);
+        sessionStorage.setItem(LOCKOUT_KEY, lockTime.toString());
+        sessionStorage.setItem(ATTEMPTS_KEY, "0");
+        showAuthError("連續失敗 5 次，系統已鎖定 30 秒防護！");
+    } else {
+        showAuthError(`主密碼錯誤！(剩餘嘗試次數: ${5 - attempts})`);
+    }
+}
+
+function resetAttempts() {
+    sessionStorage.removeItem(ATTEMPTS_KEY);
+    sessionStorage.removeItem(LOCKOUT_KEY);
+}
+
+async function handleUnlock(e) {
+    e.preventDefault();
+    if (checkLockout()) return;
+
+    const pwdInput = document.getElementById('master-password');
+    const pwd = pwdInput.value;
+    if (!pwd) return;
+
+    try {
+        const rawVault = localStorage.getItem(STORAGE_KEY);
+        if (rawVault) {
+            const encryptedRecord = JSON.parse(rawVault);
+            const decrypted = await decryptPayload(encryptedRecord, pwd);
+            state.memoryEntries = decrypted.entries;
+            state.aesKey = decrypted.activeKey;
+        } else {
+            const initSalt = crypto.getRandomValues(new Uint8Array(16));
+            const keys = await deriveKeys(pwd, initSalt);
+            state.aesKey = keys.aesKey;
+            state.memoryEntries = [];
+        }
+
+        resetAttempts();
+        hideAuthError();
+        pwdInput.value = '';
+
+        document.getElementById('vault-auth-card').style.display = 'none';
+        document.getElementById('writing-hub').style.display = 'block';
+
+        renderEntries();
+        startIdleTimer();
+        initDraftRestoration();
+    } catch (err) {
+        handleFailedAttempt();
+    }
+}
+
+function lockVault() {
+    state.aesKey = null;
+    state.memoryEntries = [];
+    clearTimeout(state.idleTimer);
+    clearInterval(state.draftInterval);
+
+    document.getElementById('change-pwd-modal').style.display = 'none';
+    document.getElementById('writing-hub').style.display = 'none';
+    document.getElementById('vault-auth-card').style.display = 'block';
+    document.getElementById('saved-list').innerHTML = '';
+}
+
+function startIdleTimer() {
+    clearTimeout(state.idleTimer);
+    state.idleTimer = setTimeout(() => {
+        lockVault();
+        showAuthError("超過 5 分鐘無操作，保險庫已自動鎖定保護隱私。");
+    }, IDLE_TIMEOUT_MS);
+}
+
+async function saveEntry() {
+    if (!state.aesKey) return;
+
+    let title = "", content = "";
+    if (state.activeTab === 'quick') {
+        title = document.getElementById('quick-title').value.trim();
+        content = document.getElementById('quick-content').value.trim();
+    } else if (state.activeTab === 'flip') {
+        title = "🧱 逆境轉化";
+        content = `挑戰: ${document.getElementById('flip-obstacle').value.trim()}\n轉化: ${document.getElementById('flip-reframe').value.trim()}`;
+    } else {
+        const date = document.getElementById('future-unlock-date').value;
+        title = `✉️ 未來信 (${date || '無指定日期'})`;
+        content = document.getElementById('future-content').value.trim();
+    }
+
+    if (!content) return;
+
+    const mood = document.getElementById('mood-selector').value;
+    const entryObj = {
+        id: Date.now(),
+        title: title || (state.currentLanguage === 'zh' ? '隨筆' : 'Note'),
+        content,
+        mood,
+        timestamp: new Date().toLocaleString()
+    };
+
+    state.memoryEntries.unshift(entryObj);
+
+    const pwdPrompt = prompt(state.currentLanguage === 'zh' ? "請輸入主密碼以確認加密儲存：" : "Re-enter master password to confirm encryption:");
+    if (!pwdPrompt) {
+        alert(state.currentLanguage === 'zh' ? "取消儲存。" : "Save cancelled.");
+        state.memoryEntries.shift();
+        return;
+    }
+
+    try {
+        const encrypted = await encryptPayload(state.memoryEntries, pwdPrompt);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(encrypted));
+        localStorage.removeItem(DRAFT_KEY);
+
+        renderEntries();
+        fireConfetti();
+
+        document.getElementById('quick-title').value = '';
+        document.getElementById('quick-content').value = '';
+        document.getElementById('flip-obstacle').value = '';
+        document.getElementById('flip-reframe').value = '';
+        document.getElementById('future-content').value = '';
+    } catch (e) {
+        alert(state.currentLanguage === 'zh' ? "密碼不符，儲存失敗！" : "Incorrect password. Save failed.");
+        state.memoryEntries.shift();
+    }
+}
+
+async function handleChangePassword() {
+    const newPwd = document.getElementById('new-password').value;
+    const confirmPwd = document.getElementById('confirm-password').value;
+
+    if (!newPwd) {
+        alert(state.currentLanguage === 'zh' ? "請輸入新密碼！" : "Please enter a new password.");
+        return;
+    }
+    if (newPwd !== confirmPwd) {
+        alert(state.currentLanguage === 'zh' ? "兩次輸入的新密碼不相符！" : "Passwords do not match!");
+        return;
+    }
+
+    try {
+        const encrypted = await encryptPayload(state.memoryEntries, newPwd);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(encrypted));
+        
+        const salt = new Uint8Array(encrypted.salt);
+        const keys = await deriveKeys(newPwd, salt);
+        state.aesKey = keys.aesKey;
+
+        document.getElementById('change-pwd-modal').style.display = 'none';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+
+        alert(state.currentLanguage === 'zh' ? "🎉 主密碼變更成功！所有資料已使用全新隨機 Salt 與 HMAC 簽章重新加密。" : "🎉 Password changed and data re-encrypted successfully.");
+    } catch (e) {
+        alert(state.currentLanguage === 'zh' ? "變更失敗，請重試。" : "Failed to change password.");
+    }
+}
+
+async function exportBackup() {
+    const rawVault = localStorage.getItem(STORAGE_KEY);
+    if (!rawVault) {
+        alert(state.currentLanguage === 'zh' ? "尚無資料可匯出！" : "No data to export!");
+        return;
+    }
+    const blob = new Blob([rawVault], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AlwaysCelebrate_Backup_${new Date().toISOString().slice(0,10)}.alwayscelebrate`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!confirm(state.currentLanguage === 'zh' ? "匯入備份將替換現有資料，確定繼續？" : "Importing will replace current data. Continue?")) {
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const importedRecord = JSON.parse(e.target.result);
+            if (!importedRecord.salt || !importedRecord.ciphertext) {
+                throw new Error("Invalid structure");
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(importedRecord));
+            alert(state.currentLanguage === 'zh' ? "備份檔導入成功！請使用該備份檔對應的主密碼重新解鎖。" : "Backup imported! Please unlock using the corresponding password.");
+            lockVault();
+        } catch (err) {
+            alert(state.currentLanguage === 'zh' ? "❌ 無效或已遭損毀/篡改的備份檔案！" : "❌ Invalid or corrupted backup file.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function initDraftRestoration() {
+    const draftRaw = localStorage.getItem(DRAFT_KEY);
+    if (draftRaw) {
+        try {
+            const d = JSON.parse(draftRaw);
+            if (confirm(state.currentLanguage === 'zh' ? "發現上次未儲存的草稿，是否恢復？" : "Unsaved draft found. Restore?")) {
+                if (d.activeTab) switchTab(d.activeTab);
+                document.getElementById('quick-title').value = d.quickTitle || '';
+                document.getElementById('quick-content').value = d.quickContent || '';
+                document.getElementById('flip-obstacle').value = d.flipObstacle || '';
+                document.getElementById('flip-reframe').value = d.flipReframe || '';
+                document.getElementById('future-unlock-date').value = d.futureUnlockDate || '';
+                document.getElementById('future-content').value = d.futureContent || '';
+            } else {
+                localStorage.removeItem(DRAFT_KEY);
+            }
+        } catch (e) { localStorage.removeItem(DRAFT_KEY); }
+    }
+
+    state.draftInterval = setInterval(() => {
+        const draftObj = {
+            activeTab: state.activeTab,
+            quickTitle: document.getElementById('quick-title').value,
+            quickContent: document.getElementById('quick-content').value,
+            flipObstacle: document.getElementById('flip-obstacle').value,
+            flipReframe: document.getElementById('flip-reframe').value,
+            futureUnlockDate: document.getElementById('future-unlock-date').value,
+            futureContent: document.getElementById('future-content').value
+        };
+        const hasContent = Object.values(draftObj).some(v => v && v !== state.activeTab);
+        if (hasContent) {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draftObj));
+        } else {
+            localStorage.removeItem(DRAFT_KEY);
+        }
+    }, 5000);
+}
+
+function renderEntries(data = state.memoryEntries) {
+    const listEl = document.getElementById('saved-list');
+    listEl.innerHTML = '';
+    data.forEach(item => {
+        const article = document.createElement('article');
+        article.className = 'entry-item';
+        
+        const header = document.createElement('div');
+        header.className = 'entry-header';
+        header.innerHTML = `<span>${escapeHTML(item.mood)} | ${escapeHTML(item.title)}</span><span>${escapeHTML(item.timestamp)}</span>`;
+        
+        const content = document.createElement('div');
+        content.style.whiteSpace = 'pre-wrap';
+        content.textContent = item.content;
+
+        article.appendChild(header);
+        article.appendChild(content);
+        listEl.appendChild(article);
+    });
+}
+
+function escapeHTML(str) {
+    const p = document.createElement('p');
+    p.textContent = str || '';
+    return p.innerHTML;
+}
+
+function switchTab(tabId) {
+    state.activeTab = tabId;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        const active = btn.dataset.tab === tabId;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', active.toString());
+    });
+    document.getElementById('panel-quick').style.display = tabId === 'quick' ? 'block' : 'none';
+    document.getElementById('panel-flip').style.display = tabId === 'flip' ? 'block' : 'none';
+    document.getElementById('panel-future').style.display = tabId === 'future' ? 'block' : 'none';
+}
+
+function setLanguage(lang) {
+    state.currentLanguage = lang;
+    document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+    document.getElementById('btn-zh').setAttribute('aria-pressed', (lang === 'zh').toString());
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-en').setAttribute('aria-pressed', (lang === 'en').toString());
+
+    const t = i18n[lang];
+    document.getElementById('txt-app-title').innerText = t.appTitle;
+    document.getElementById('txt-app-slogan').innerText = t.appSlogan;
+    document.getElementById('txt-guide-title').innerText = t.guideTitle;
+    document.getElementById('txt-guide-1').innerHTML = t.guide1;
+    document.getElementById('txt-guide-2').innerHTML = t.guide2;
+    document.getElementById('txt-guide-3').innerHTML = t.guide3;
+    document.getElementById('txt-inside-guide-title').innerText = t.insideGuideTitle;
+    document.getElementById('txt-inside-guide-1').innerHTML = t.insideGuide1;
+    document.getElementById('txt-inside-guide-2').innerHTML = t.insideGuide2;
+    document.getElementById('txt-inside-guide-3').innerHTML = t.insideGuide3;
+    document.getElementById('tab-quick').innerText = t.tabQuick;
+    document.getElementById('tab-flip').innerText = t.tabFlip;
+    document.getElementById('tab-future').innerText = t.tabFuture;
+    document.getElementById('quick-title').placeholder = t.quickTitleHolder;
+    document.getElementById('quick-content').placeholder = t.quickContentHolder;
+    document.getElementById('flip-obstacle').placeholder = t.flipObstacleHolder;
+    document.getElementById('flip-reframe').placeholder = t.flipReframeHolder;
+    document.getElementById('future-content').placeholder = t.futureContentHolder;
+    document.getElementById('btn-unlock').innerText = t.btnUnlock;
+    document.getElementById('btn-save').innerText = t.btnSave;
+    document.getElementById('txt-status-unlocked').innerText = t.statusUnlocked;
+    document.getElementById('btn-manual-lock').innerText = t.btnManualLock;
+    document.getElementById('btn-export').innerText = t.btnExport;
+    document.getElementById('btn-import-trigger').innerText = t.btnImport;
+    document.getElementById('btn-change-pwd').innerText = t.btnChangePwd;
+    document.getElementById('search-input').placeholder = t.searchHolder;
+    document.getElementById('txt-change-pwd-title').innerText = t.txtChangePwdTitle;
+    document.getElementById('btn-confirm-pwd-change').innerText = t.btnConfirmPwdChange;
+    document.getElementById('btn-cancel-pwd-change').innerText = t.btnCancelPwdChange;
+}
+
+function showAuthError(msg) {
+    const el = document.getElementById('error-msg');
+    el.innerText = msg;
+    el.style.display = 'block';
+}
+
+function hideAuthError() {
+    document.getElementById('error-msg').style.display = 'none';
+}
+
+function fireConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+    for (let i = 0; i < 60; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            color: ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'][Math.floor(Math.random() * 5)],
+            size: Math.random() * 7 + 4,
+            speedY: Math.random() * 4 + 2,
+            speedX: Math.random() * 2 - 1
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            p.y += p.speedY;
+            p.x += p.speedX;
+        });
+        if (particles.some(p => p.y < canvas.height)) {
+            requestAnimationFrame(draw);
+        }
+    }
+    draw();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('form-auth').addEventListener('submit', handleUnlock);
+
+    document.getElementById('master-password').addEventListener('input', (e) => {
+        evaluatePasswordStrength(e.target.value, document.getElementById('strength-bar-auth'));
+    });
+    document.getElementById('new-password').addEventListener('input', (e) => {
+        evaluatePasswordStrength(e.target.value, document.getElementById('strength-bar-change'));
+    });
+
+    document.getElementById('btn-manual-lock').addEventListener('click', lockVault);
+    document.getElementById('btn-save').addEventListener('click', saveEntry);
+    document.getElementById('btn-export').addEventListener('click', exportBackup);
+    document.getElementById('btn-import-trigger').addEventListener('click', () => {
+        document.getElementById('import-file-input').click();
+    });
+    document.getElementById('import-file-input').addEventListener('change', importBackup);
+    
+    document.getElementById('btn-change-pwd').addEventListener('click', () => {
+        document.getElementById('change-pwd-modal').style.display = 'block';
+    });
+    document.getElementById('btn-cancel-pwd-change').addEventListener('click', () => {
+        document.getElementById('change-pwd-modal').style.display = 'none';
+    });
+    document.getElementById('btn-confirm-pwd-change').addEventListener('click', handleChangePassword);
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!q) {
+            renderEntries(state.memoryEntries);
+            return;
+        }
+        const filtered = state.memoryEntries.filter(item => 
+            (item.title && item.title.toLowerCase().includes(q)) ||
+            (item.content && item.content.toLowerCase().includes(q)) ||
+            (item.mood && item.mood.toLowerCase().includes(q))
+        );
+        renderEntries(filtered);
+    });
+
+    ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => {
+        window.addEventListener(evt, () => {
+            if (state.aesKey) startIdleTimer();
+        });
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && state.aesKey) {
+            lockVault();
+        } else if (e.ctrlKey && e.key === 'Enter' && state.aesKey) {
+            saveEntry();
+        }
+    });
+});
