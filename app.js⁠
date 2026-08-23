@@ -1,8 +1,29 @@
 /**
- * 常慶功 Always Celebrate - Enterprise Cryptographic Engine (v2.0.0 Final)
- * Zero-Knowledge, Offline-First, PBKDF2 (600k) + AES-GCM 256 + HMAC-SHA256
+ * @file app.js
+ * @description 常慶功 Always Celebrate - Enterprise Cryptographic Engine (v2.1.0 Textbook Grade)
+ * @author 羅子淇 Jacky Law <https://jackylawck.github.io/jackylawck/>
+ * @license MIT
  */
 
+/**
+ * @typedef {Object} CelebrationEntry
+ * @property {number} id
+ * @property {string} title
+ * @property {string} content
+ * @property {string} mood
+ * @property {string} timestamp
+ */
+
+/**
+ * @typedef {Object} EncryptedVaultPayload
+ * @property {string} version
+ * @property {number[]} salt
+ * @property {number[]} iv
+ * @property {number[]} ciphertext
+ * @property {number[]} [hmac]
+ */
+
+// 1. 常數與系統配置
 const STORAGE_KEY = "ALWAYS_CELEBRATE_VAULT_V2";
 const DRAFT_KEY = "ALWAYS_CELEBRATE_DRAFT_V3";
 const ATTEMPTS_KEY = "AC_FAILED_ATTEMPTS";
@@ -10,15 +31,19 @@ const LOCKOUT_KEY = "AC_LOCKOUT_TIME";
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 const PBKDF2_ITERATIONS = 600000;
 
+// 2. 封裝應用狀態
 const state = {
     currentLanguage: 'zh',
     activeTab: 'quick',
+    /** @type {CryptoKey|null} */
     aesKey: null,
+    /** @type {CelebrationEntry[]} */
     memoryEntries: [],
     idleTimer: null,
     draftInterval: null
 };
 
+// 3. 雙語字典
 const i18n = {
     zh: {
         appTitle: "常慶功 Always Celebrate",
@@ -84,6 +109,42 @@ const i18n = {
     }
 };
 
+// 4. 自訂無障礙 UI Toast 提示系統 (取代原生 alert)
+function showToast(message, isError = false) {
+    let toast = document.getElementById('custom-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'custom-toast';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            transition: opacity 0.3s ease;
+            text-align: center;
+            max-width: 90vw;
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.style.background = isError ? '#e74c3c' : '#2ecc71';
+    toast.style.color = '#ffffff';
+    toast.textContent = message;
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 3000);
+}
+
+// 5. 密碼學核心引擎 (Web Crypto API)
 async function deriveKeys(password, saltUint8Array) {
     const encoder = new TextEncoder();
     const baseKey = await crypto.subtle.importKey(
@@ -138,7 +199,7 @@ async function decryptPayload(encryptedRecord, password) {
         const hmacSig = new Uint8Array(encryptedRecord.hmac);
         const isValid = await crypto.subtle.verify('HMAC', hmacKey, hmacSig, ciphertext);
         if (!isValid) {
-            throw new Error("HMAC verification failed");
+            throw new Error("HMAC Integrity verification failed: Tampered file");
         }
     }
 
@@ -149,6 +210,7 @@ async function decryptPayload(encryptedRecord, password) {
     };
 }
 
+// 6. 密碼強度檢測
 function evaluatePasswordStrength(pwd, barElement) {
     if (!barElement) return;
     if (!pwd) { barElement.style.width = '0%'; return; }
@@ -164,6 +226,7 @@ function evaluatePasswordStrength(pwd, barElement) {
     else barElement.style.background = '#2ecc71';
 }
 
+// 7. 防暴力破解與會話鎖定
 function checkLockout() {
     const lockoutUntil = parseInt(sessionStorage.getItem(LOCKOUT_KEY) || "0", 10);
     const now = Date.now();
@@ -194,6 +257,7 @@ function resetAttempts() {
     sessionStorage.removeItem(LOCKOUT_KEY);
 }
 
+// 8. 解鎖與鎖定流程
 async function handleUnlock(e) {
     e.preventDefault();
     if (checkLockout()) return;
@@ -227,6 +291,7 @@ async function handleUnlock(e) {
         startIdleTimer();
         initDraftRestoration();
     } catch (err) {
+        console.error("Auth Failure:", err);
         handleFailedAttempt();
     }
 }
@@ -251,6 +316,7 @@ function startIdleTimer() {
     }, IDLE_TIMEOUT_MS);
 }
 
+// 9. 儲存記錄
 async function saveEntry() {
     if (!state.aesKey) return;
 
@@ -267,7 +333,10 @@ async function saveEntry() {
         content = document.getElementById('future-content').value.trim();
     }
 
-    if (!content) return;
+    if (!content) {
+        showToast(state.currentLanguage === 'zh' ? "內容不能為空！" : "Content cannot be empty!", true);
+        return;
+    }
 
     const mood = document.getElementById('mood-selector').value;
     const entryObj = {
@@ -282,8 +351,8 @@ async function saveEntry() {
 
     const pwdPrompt = prompt(state.currentLanguage === 'zh' ? "請輸入主密碼以確認加密儲存：" : "Re-enter master password to confirm encryption:");
     if (!pwdPrompt) {
-        alert(state.currentLanguage === 'zh' ? "取消儲存。" : "Save cancelled.");
         state.memoryEntries.shift();
+        showToast(state.currentLanguage === 'zh' ? "取消儲存。" : "Save cancelled.");
         return;
     }
 
@@ -294,6 +363,7 @@ async function saveEntry() {
 
         renderEntries();
         fireConfetti();
+        showToast(state.currentLanguage === 'zh' ? "🎉 慶功記錄已加密儲存！" : "🎉 Celebrated entry securely encrypted!");
 
         document.getElementById('quick-title').value = '';
         document.getElementById('quick-content').value = '';
@@ -301,21 +371,23 @@ async function saveEntry() {
         document.getElementById('flip-reframe').value = '';
         document.getElementById('future-content').value = '';
     } catch (e) {
-        alert(state.currentLanguage === 'zh' ? "密碼不符，儲存失敗！" : "Incorrect password. Save failed.");
+        console.error("Encryption Failure:", e);
         state.memoryEntries.shift();
+        showToast(state.currentLanguage === 'zh' ? "密碼不符，儲存失敗！" : "Incorrect password. Save failed.", true);
     }
 }
 
+// 10. 變更密碼 (Re-encryption)
 async function handleChangePassword() {
     const newPwd = document.getElementById('new-password').value;
     const confirmPwd = document.getElementById('confirm-password').value;
 
     if (!newPwd) {
-        alert(state.currentLanguage === 'zh' ? "請輸入新密碼！" : "Please enter a new password.");
+        showToast(state.currentLanguage === 'zh' ? "請輸入新密碼！" : "Please enter a new password.", true);
         return;
     }
     if (newPwd !== confirmPwd) {
-        alert(state.currentLanguage === 'zh' ? "兩次輸入的新密碼不相符！" : "Passwords do not match!");
+        showToast(state.currentLanguage === 'zh' ? "兩次輸入的新密碼不相符！" : "Passwords do not match!", true);
         return;
     }
 
@@ -331,16 +403,18 @@ async function handleChangePassword() {
         document.getElementById('new-password').value = '';
         document.getElementById('confirm-password').value = '';
 
-        alert(state.currentLanguage === 'zh' ? "🎉 主密碼變更成功！所有資料已使用全新隨機 Salt 與 HMAC 簽章重新加密。" : "🎉 Password changed and data re-encrypted successfully.");
+        showToast(state.currentLanguage === 'zh' ? "🎉 主密碼變更成功！所有資料已重新加密。" : "🎉 Password changed and data re-encrypted.");
     } catch (e) {
-        alert(state.currentLanguage === 'zh' ? "變更失敗，請重試。" : "Failed to change password.");
+        console.error("Re-encryption Failure:", e);
+        showToast(state.currentLanguage === 'zh' ? "變更失敗，請重試。" : "Failed to change password.", true);
     }
 }
 
+// 11. 備份與匯入
 async function exportBackup() {
     const rawVault = localStorage.getItem(STORAGE_KEY);
     if (!rawVault) {
-        alert(state.currentLanguage === 'zh' ? "尚無資料可匯出！" : "No data to export!");
+        showToast(state.currentLanguage === 'zh' ? "尚無資料可匯出！" : "No data to export!", true);
         return;
     }
     const blob = new Blob([rawVault], { type: 'application/json' });
@@ -369,15 +443,17 @@ function importBackup(event) {
                 throw new Error("Invalid structure");
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(importedRecord));
-            alert(state.currentLanguage === 'zh' ? "備份檔導入成功！請使用該備份檔對應的主密碼重新解鎖。" : "Backup imported! Please unlock using the corresponding password.");
+            showToast(state.currentLanguage === 'zh' ? "備份檔導入成功！請重新解鎖。" : "Backup imported! Please unlock.");
             lockVault();
         } catch (err) {
-            alert(state.currentLanguage === 'zh' ? "❌ 無效或已遭損毀/篡改的備份檔案！" : "❌ Invalid or corrupted backup file.");
+            console.error("Import Failure:", err);
+            showToast(state.currentLanguage === 'zh' ? "❌ 無效或已遭損毀的備份檔！" : "❌ Invalid or corrupted backup file.", true);
         }
     };
     reader.readAsText(file);
 }
 
+// 12. 草稿系統
 function initDraftRestoration() {
     const draftRaw = localStorage.getItem(DRAFT_KEY);
     if (draftRaw) {
@@ -416,9 +492,13 @@ function initDraftRestoration() {
     }, 5000);
 }
 
+// 13. DOM 批次渲染 (DocumentFragment 效能優化)
 function renderEntries(data = state.memoryEntries) {
     const listEl = document.getElementById('saved-list');
     listEl.innerHTML = '';
+    
+    const fragment = document.createDocumentFragment();
+
     data.forEach(item => {
         const article = document.createElement('article');
         article.className = 'entry-item';
@@ -433,8 +513,10 @@ function renderEntries(data = state.memoryEntries) {
 
         article.appendChild(header);
         article.appendChild(content);
-        listEl.appendChild(article);
+        fragment.appendChild(article);
     });
+
+    listEl.appendChild(fragment);
 }
 
 function escapeHTML(str) {
@@ -537,6 +619,7 @@ function fireConfetti() {
     draw();
 }
 
+// 14. 事件委派監聽
 document.addEventListener('DOMContentLoaded', () => {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
