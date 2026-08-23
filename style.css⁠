@@ -1,4 +1,10 @@
+/**
+ * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.0.0 Final)
+ * Responsive, Accessible, Print-Ready & Variable-Driven
+ */
+
 :root {
+    /* 🎨 色彩變數系統 Color Tokens */
     --bg-color: #0b0f19;
     --card-bg: #151c2c;
     --card-border: #2c3e50;
@@ -9,22 +15,52 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --input-bg: #070a12;
+
+    /* 📏 字體尺度 Font Scale */
+    --font-xs: 0.75rem;
+    --font-sm: 0.85rem;
+    --font-base: 0.95rem;
+    --font-md: 1rem;
+    --font-lg: 1.25rem;
+    --font-xl: 1.6rem;
     --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+    /* 📐 間距與尺寸 Spacing Tokens */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+
+    /* 🔘 圓角尺度 Radius Tokens */
+    --radius-sm: 6px;
+    --radius-md: 9px;
+    --radius-lg: 14px;
+
+    /* ⏱️ 動畫轉場 Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-smooth: 0.3s ease;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
 
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: var(--font-stack);
     line-height: 1.6;
-    padding: 20px;
+    padding: var(--space-5);
     display: flex;
     justify-content: center;
     min-height: 100vh;
 }
 
+/* ♿ 無障礙專用隱藏類別 Screen Readers Only */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -36,26 +72,41 @@ body {
     border: 0;
 }
 
-.app-container { max-width: 680px; width: 100%; }
+.app-container { 
+    max-width: 680px; 
+    width: 100%; 
+}
 
+/* 頂部標頭 Header Section */
 .header-section {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
     border-bottom: 1px solid var(--card-border);
 }
 
-.app-title { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); }
-.app-slogan { font-size: 0.88rem; color: var(--accent-gold); margin-top: 2px; }
+.app-title { 
+    font-size: var(--font-xl); 
+    font-weight: 700; 
+    color: var(--text-primary); 
+    line-height: 1.2;
+}
 
+.app-slogan { 
+    font-size: var(--font-sm); 
+    color: var(--accent-gold); 
+    margin-top: var(--space-1); 
+}
+
+/* 語言切換 Switcher */
 .lang-switch-group {
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 8px;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
     border: 1px solid var(--card-border);
 }
 
@@ -63,10 +114,11 @@ body {
     background: transparent;
     color: var(--text-secondary);
     border: none;
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: var(--font-xs);
+    transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .lang-btn.active {
@@ -75,21 +127,24 @@ body {
     font-weight: 600;
 }
 
+/* 卡片與容器 Cards */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 20px;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
+/* 說明指南導引盒 Guide Boxes */
 .guide-box {
     background: rgba(243, 156, 18, 0.08);
     border: 1px solid rgba(243, 156, 18, 0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    font-size: 0.88rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-4);
+    margin-bottom: var(--space-4);
+    font-size: var(--font-sm);
 }
 
 .guide-box-success {
@@ -97,18 +152,26 @@ body {
     border-color: rgba(46, 204, 113, 0.25);
 }
 
-.guide-title { font-weight: 600; color: var(--accent-gold); margin-bottom: 8px; font-size: 0.95rem; }
-.text-success { color: var(--success-color); }
-.guide-list { padding-left: 18px; color: var(--text-secondary); }
-.guide-list li { margin-bottom: 6px; }
+.guide-title { 
+    font-weight: 600; 
+    color: var(--accent-gold); 
+    margin-bottom: var(--space-2); 
+    font-size: var(--font-base); 
+}
 
+.text-success { color: var(--success-color); }
+.guide-list { padding-left: var(--space-5); color: var(--text-secondary); }
+.guide-list li { margin-bottom: var(--space-2); }
+.guide-list li:last-child { margin-bottom: 0; }
+
+/* 模式標籤頁 Mode Tabs */
 .mode-tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
     background: var(--input-bg);
-    padding: 4px;
-    border-radius: 10px;
+    padding: var(--space-1);
+    border-radius: var(--radius-md);
     border: 1px solid var(--card-border);
 }
 
@@ -117,11 +180,12 @@ body {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.88rem;
+    font-size: var(--font-sm);
     text-align: center;
+    transition: all var(--transition-fast);
 }
 
 .tab-btn.active {
@@ -130,55 +194,70 @@ body {
     font-weight: 600;
 }
 
-input[type="text"], input[type="password"], input[type="date"], input[type="search"], textarea, select {
+/* 表單與輸入控制 Forms */
+input[type="text"], 
+input[type="password"], 
+input[type="date"], 
+input[type="search"], 
+textarea, 
+select {
     width: 100%;
-    padding: 12px;
-    margin: 6px 0 14px 0;
-    border-radius: 8px;
+    padding: var(--space-3);
+    margin: var(--space-1) 0 var(--space-4) 0;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--card-border);
     background: var(--input-bg);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--font-base);
     font-family: inherit;
     outline: none;
+    transition: border-color var(--transition-fast);
 }
 
-input:focus, textarea:focus, select:focus { border-color: var(--accent-gold); }
-textarea { resize: vertical; min-height: 100px; }
+input:focus, textarea:focus, select:focus { 
+    border-color: var(--accent-gold); 
+}
 
+textarea { 
+    resize: vertical; 
+    min-height: 100px; 
+}
+
+/* 密碼強度計 UI */
 .strength-bar-wrapper {
     height: 4px;
     background: var(--input-bg);
     border-radius: 2px;
     margin-top: -8px;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     overflow: hidden;
 }
 
 .strength-bar {
     height: 100%;
     width: 0%;
-    transition: all 0.3s ease;
+    transition: all var(--transition-smooth);
 }
 
 .error-text {
     color: var(--danger-color);
-    font-size: 0.85rem;
+    font-size: var(--font-sm);
     margin-top: -8px;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-3);
 }
 
+/* 按鈕系統 Buttons & Interactions */
 .btn-primary {
     background: var(--accent-gold);
     color: #ffffff;
     border: none;
-    padding: 13px 20px;
-    border-radius: 9px;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: var(--font-md);
     font-weight: 600;
     width: 100%;
-    transition: background 0.2s;
+    transition: background var(--transition-fast), opacity var(--transition-fast);
 }
 
 .btn-primary:hover { background: var(--accent-gold-hover); }
@@ -187,72 +266,104 @@ textarea { resize: vertical; min-height: 100px; }
     background: #1e293b;
     color: var(--text-primary);
     border: 1px solid var(--card-border);
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.88rem;
+    font-size: var(--font-sm);
     font-weight: 500;
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
 }
 
 .btn-secondary:hover { background: #334155; }
-.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+.btn-sm { padding: 4px 10px; font-size: var(--font-xs); }
 
+/* 禁用狀態 Disabled States */
+button:disabled, input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 狀態列 Status Bar */
 .status-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
     border-bottom: 1px solid var(--card-border);
 }
 
-.status-text { font-size: 0.85rem; color: var(--success-color); font-weight: 600; }
-.search-bar { margin-top: 15px; }
+.status-text { 
+    font-size: var(--font-sm); 
+    color: var(--success-color); 
+    font-weight: 600; 
+}
 
+.search-bar { margin-top: var(--space-4); }
+
+/* 備份控制列 Backup Controls */
 .backup-controls {
     display: flex;
-    gap: 10px;
+    gap: var(--space-3);
     flex-wrap: wrap;
-    margin-top: 15px;
-    padding-top: 15px;
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
     border-top: 1px solid var(--card-border);
 }
 
-.backup-controls button { flex: 1; min-width: 140px; }
+.backup-controls button { 
+    flex: 1; 
+    min-width: 140px; 
+}
 
+/* 變更密碼 Modal */
 .modal-box {
-    margin-top: 15px;
-    padding: 15px;
+    margin-top: var(--space-4);
+    padding: var(--space-4);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     background: var(--input-bg);
 }
 
-.modal-title { color: var(--accent-gold); margin-bottom: 10px; font-size: 0.95rem; }
-.btn-group-row { display: flex; gap: 10px; margin-top: 6px; }
-.btn-group-row button { flex: 1; padding: 8px 12px; font-size: 0.9rem; }
+.modal-title { 
+    color: var(--accent-gold); 
+    margin-bottom: var(--space-3); 
+    font-size: var(--font-base); 
+}
 
+.btn-group-row { 
+    display: flex; 
+    gap: var(--space-3); 
+    margin-top: var(--space-2); 
+}
+
+.btn-group-row button { 
+    flex: 1; 
+    padding: var(--space-2) var(--space-3); 
+    font-size: var(--font-sm); 
+}
+
+/* 儲存列表項目 Entries List */
 .saved-list {
-    margin-top: 15px;
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-3);
 }
 
 .entry-item {
     background: var(--input-bg);
     border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
 }
 
 .entry-header {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: var(--font-sm);
     color: var(--accent-gold);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
 }
 
 #confetti-canvas {
@@ -261,4 +372,61 @@ textarea { resize: vertical; min-height: 100px; }
     width: 100vw; height: 100vh;
     pointer-events: none;
     z-index: 9999;
+}
+
+/* 📱 響應式斷點 1: 平板與手機 (<= 600px) */
+@media (max-width: 600px) {
+    body { padding: var(--space-3); }
+    .header-section { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+    .app-title { font-size: 1.35rem; }
+    .backup-controls button { min-width: auto; flex: 1 0 45%; }
+    .btn-primary, .btn-secondary { font-size: var(--font-sm); padding: var(--space-3); }
+    .entry-header { flex-direction: column; gap: var(--space-1); }
+}
+
+/* 📱 響應式斷點 2: 超小螢幕手機 (<= 420px) */
+@media (max-width: 420px) {
+    .card { padding: var(--space-4); }
+    .mode-tabs { flex-wrap: wrap; }
+    .tab-btn { flex: 1 0 30%; font-size: var(--font-xs); padding: var(--space-2) var(--space-1); }
+    .btn-group-row { flex-direction: column; }
+}
+
+/* 🖨️ 打印專用樣式 Print Stylesheet */
+@media print {
+    body { 
+        background: #ffffff !important; 
+        color: #000000 !important; 
+        padding: 0;
+    }
+    .lang-switch-group, 
+    .status-bar, 
+    .backup-controls, 
+    #btn-save, 
+    .mode-tabs, 
+    .guide-box, 
+    #search-input, 
+    .btn-sm, 
+    #confetti-canvas,
+    #change-pwd-modal,
+    #form-auth {
+        display: none !important;
+    }
+    .card { 
+        border: 1px solid #cccccc !important; 
+        background: #ffffff !important; 
+        box-shadow: none !important;
+        padding: var(--space-4) !important;
+    }
+    .entry-item { 
+        border: 1px solid #e2e8f0 !important; 
+        background: #ffffff !important; 
+        color: #000000 !important;
+        page-break-inside: avoid;
+    }
+    .entry-header { 
+        color: #333333 !important; 
+        border-bottom: 1px solid #eee;
+        padding-bottom: var(--space-1);
+    }
 }
