@@ -1,6 +1,6 @@
 /**
  * @file app.js
- * @description 常慶功 Always Celebrate - Enterprise Cryptographic Engine (v2.1.0 Textbook Grade)
+ * @description 常慶功 Always Celebrate - Enterprise Cryptographic Engine (v2.2.0 Textbook Grade)
  * @author 羅子淇 Jacky Law <https://jackylawck.github.io/jackylawck/>
  * @license MIT
  */
@@ -111,7 +111,7 @@ const i18n = {
     }
 };
 
-// 4. 自訂無障礙 UI Toast 提示系統 (取代原生 alert)
+// 4. 自訂無障礙 UI Toast 提示系統 (同步繁花朝陽質感配色)
 function showToast(message, isError = false) {
     let toast = document.getElementById('custom-toast');
     if (!toast) {
@@ -127,17 +127,20 @@ function showToast(message, isError = false) {
             padding: 12px 24px;
             border-radius: 8px;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 700;
             z-index: 10000;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             transition: opacity 0.3s ease;
             text-align: center;
             max-width: 90vw;
+            letter-spacing: 0.5px;
         `;
         document.body.appendChild(toast);
     }
-    toast.style.background = isError ? '#e74c3c' : '#2ecc71';
-    toast.style.color = '#ffffff';
+    toast.style.background = isError 
+        ? 'linear-gradient(135deg, #e11d48, #be123c)' 
+        : 'linear-gradient(135deg, #f59e0b, #d97706)';
+    toast.style.color = isError ? '#ffffff' : '#140d07';
     toast.textContent = message;
     toast.style.opacity = '1';
 
@@ -223,9 +226,9 @@ function evaluatePasswordStrength(pwd, barElement) {
     if (/[0-9]/.test(pwd) || /[^A-Za-z0-9]/.test(pwd)) score += 25;
 
     barElement.style.width = score + '%';
-    if (score <= 50) barElement.style.background = '#e74c3c';
-    else if (score <= 75) barElement.style.background = '#f1c40f';
-    else barElement.style.background = '#2ecc71';
+    if (score <= 50) barElement.style.background = '#f43f5e';
+    else if (score <= 75) barElement.style.background = '#f59e0b';
+    else barElement.style.background = 'linear-gradient(90deg, #f59e0b, #10b981)';
 }
 
 // 7. 防暴力破解與會話鎖定
@@ -595,18 +598,21 @@ function hideAuthError() {
     document.getElementById('error-msg').style.display = 'none';
 }
 
+// 撒花慶祝系統（繁花朝陽金芒色系）
 function fireConfetti() {
     const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    const confettiColors = ['#ffd166', '#f59e0b', '#fbbf24', '#f43f5e', '#10b981', '#ffffff'];
     let particles = [];
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 70; i++) {
         particles.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height - canvas.height,
-            color: ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'][Math.floor(Math.random() * 5)],
+            color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
             size: Math.random() * 7 + 4,
             speedY: Math.random() * 4 + 2,
             speedX: Math.random() * 2 - 1
@@ -627,6 +633,9 @@ function fireConfetti() {
     }
     draw();
 }
+
+// 🔗 暴露至全域，供 js/celebrate.js 彩蛋指令直接調用
+window.fireConfetti = fireConfetti;
 
 // 14. 事件委派監聽
 document.addEventListener('DOMContentLoaded', () => {
