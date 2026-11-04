@@ -1,5 +1,5 @@
 /**
- * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.1.0 Textbook Grade)
+ * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.2.0 Textbook Grade)
  * 繁花朝陽色系：晨曦金芒、暖焦糖木、溫潤象牙白
  * Responsive, Accessible, Print-Ready & Variable-Driven
  */
@@ -60,7 +60,8 @@
     --transition-smooth: 0.3s ease;
 }
 
-* { 
+/* 🛠️ 修復：萬用選擇器盒模型重置 */
+*, *::before, *::after { 
     box-sizing: border-box; 
     margin: 0; 
     padding: 0; 
@@ -77,6 +78,9 @@ body {
     display: flex;
     justify-content: center;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* ♿ 鍵盤無障礙跳至主要內容連結 (Skip Link) */
