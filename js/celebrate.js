@@ -1,27 +1,26 @@
 /**
  * =========================================================================
- * 🌸 黃河路 × 外灘 // 繁花自渡與預祝哲學終端 (THE BLOSSOMS PROTOCOL)
- * 100% Client-Side Pure JS • Cinematic 90s Neon Visuals & Positive Mindset
+ * 🌟 黃河路 × 外灘 // 時代精神・常慶功終端 (THE GOLDEN ERA PROTOCOL)
+ * 100% Client-Side Pure JS • Cinematic 90s Neon Visuals & Pre-Celebration
  * 
  * 致敬精神：
- * 汪小姐「我是我自己的碼頭」—— 自立、韌性與自我實現
- * 魏總「大張旗鼓，未贏先賀」—— 樂觀、敢搏、慶祝即信念
+ * 汪小姐「我是我自己的碼頭」—— 走出27號，自尊自立，逆境破局
+ * 魏總「大張旗鼓，未贏先賀」—— 八十八道霸王別姬，豪邁果敢，經常慶功就能成功
  * =========================================================================
  */
 (function () {
     'use strict';
 
-    // 經典等寬字型棧
     var FONT = '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace';
 
-    // 90s 黃河路王家衛色調系統：至真琥珀金、進賢霓虹洋紅、夜宴翡翠綠、午夜深黑
+    // 90 年代經典霓虹光影：至真金、進賢洋紅、夜宴翡翠綠、午夜深黑
     var C = {
         noir: '#08080c',
         gold: '#FFB800',
         goldHover: '#FFA000',
         neonRose: '#FF2A5F',
         jadeGreen: '#00F5A0',
-        subText: '#D1D5DB',
+        subText: '#CBD5E1',
         borderMuted: '#242436'
     };
 
@@ -46,7 +45,7 @@
             'font-family: ' + FONT + ';',
             'font-size: 11px;',
             'font-weight: bold;',
-            'padding: 5px 12px;',
+            'padding: 6px 12px;',
             'border-left: 5px solid ' + C.neonRose + ';',
             'border-bottom: 1px solid ' + C.borderMuted + ';',
             'border-right: 1px solid ' + C.borderMuted + ';',
@@ -54,7 +53,7 @@
         ].join(''),
 
         archetypeDock: [
-            'background: #120a02;',
+            'background: #160d03;',
             'color: ' + C.gold + ';',
             'font-family: ' + FONT + ';',
             'font-size: 11px;',
@@ -65,7 +64,7 @@
         ].join(''),
 
         archetypeFeast: [
-            'background: #140308;',
+            'background: #170308;',
             'color: ' + C.neonRose + ';',
             'font-family: ' + FONT + ';',
             'font-size: 11px;',
@@ -106,13 +105,13 @@
         desc: 'background: ' + C.noir + '; color: ' + C.subText + '; font-family: ' + FONT + '; padding: 2px 6px;'
     };
 
-    function renderBlossomsHeader() {
-        console.log('%c[ HUANGHE ROAD // 繁花自渡與預祝終端 (THE BLOSSOMS RESILIENCE ENGINE) ]', S.banner);
-        console.log('%c「人生的碼頭從不在別人身上，排場與勇氣都在自己手中。」• RESILIENCE & PRE-CELEBRATION', S.tagline);
+    function renderConsoleHeader() {
+        console.log('%c[ HUANGHE ROAD × THE BUND // 時代精神・常慶功終端 (THE GOLDEN ERA PROTOCOL) ]', S.banner);
+        console.log('%c「經常慶功，就能成功。」• 我是我自己的碼頭，前行何須借東風。', S.tagline);
         console.log('');
 
         console.log(
-            '%c汪小姐哲學 [THE DOCK PROTOCOL]: 我是我自己的碼頭%c   %c魏總膽識 [THE TOAST AMBITION]: 越慶祝越成功，排場行先%c',
+            '%c汪小姐【碼頭自立信條】: 走出27號，我是我自己的碼頭%c   %c魏總【八十八道霸王別姬】: 大張旗鼓，未贏先賀，經常慶功就能成功%c',
             S.archetypeDock, '',
             S.archetypeFeast, ''
         );
@@ -120,20 +119,19 @@
 
         var manifest = [
             '┌────────────────────────────────────────────────────────────────────────┐',
-            '│ 【雙重激勵哲學與預祝心法 / Core Mindsets】                            │',
+            '│ 【雙重激勵哲學與常慶功心法 / Core Mindsets】                          │',
             '├────────────────────────────────────────────────────────────────────────┤',
-            '│ • 碼頭法則 (Wang\'s Dock) : 撕去一切附屬標籤，以自尊與專業作本，自己成就自己。│',
-            '│ • 慶功膽魄 (Wei\'s Toast) : 面對未知先擺出慶祝的豪氣，心態先行，勝利隨之而至。│',
-            '│ • 轉化逆境 (Crisis Flip) : 狂風暴雨非障礙，而是個人品牌重生的盛大剪綵。    │',
+            '│ • 碼頭法則 (The Dock)     : 走出27號，憑熱血與韌勁，做自己真正的主角。 │',
+            '│ • 預祝膽魄 (The Pre-Toast): 勝利未至，排場先起；信念篤定，前程自會如期綻放。   │',
+            '│ • 逆境轉化 (Crisis Flip)  : 諸暨風雨不是末路，而是個人傳奇最盛大的剪綵開場。 │',
             '└────────────────────────────────────────────────────────────────────────┘'
         ].join('\n');
 
         console.log('%c' + manifest, S.scriptPanel);
         console.log('');
-        console.log('%c💡 終端互動指令: 請輸入 blossom.help() 開啟專屬心靈指南 / Type blossom.help() for suite.', S.cliBar);
+        console.log('%c💡 終端互動指令: 輸入 celebrate.help() 或 blossom.help() 開啟專屬賦能指南 / Type celebrate.help()', S.cliBar);
     }
 
-    // 螢幕電影感琥珀霓虹光影（自動適應減弱動態偏好）
     function triggerCinematicGaze() {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             console.log('%c[ SYSTEM NOTICE ] 系統開啟減少動態效果，已抑制光影濾鏡。', 'color:' + C.gold + ';');
@@ -157,44 +155,42 @@
             doc.style.boxShadow = prevShadow;
             doc.style.filter = prevFilter;
             doc.style.transition = prevTrans;
-            console.log('%c[ 🌸 霓虹歸位 // 萬家燈火照亮自立前路・祝你成功 ]', 'background:#000; color:' + C.gold + '; font-weight:bold; padding:4px 8px; font-family:' + FONT);
+            console.log('%c[ 🌸 萬家燈火 // 黃河路霓虹歸位・照亮每位自主自立的奮鬥者 ]', 'background:#000; color:' + C.gold + '; font-weight:bold; padding:4px 8px; font-family:' + FONT);
         }, 1500);
     }
 
-    // 註冊 window.blossom 互動指令集
-    window.blossom = Object.freeze({
+    var api = Object.freeze({
         help: function () {
-            console.log('%c[ BLOSSOMS SUITE // 心靈賦能指令目錄 ]', S.banner);
-            console.log('%cblossom.dock()%c       - 汪小姐「碼頭法則」：激發自立信心與自我主權 / Declare Self-Reliance', S.key, S.desc);
-            console.log('%cblossom.toast()%c      - 魏總「八十八道霸王別姬」：未贏先慶祝，燃點勇氣 / Pre-celebrate Extravagantly', S.key, S.desc);
-            console.log('%cblossom.reframe()%c    - 逆境破局心法：將當前低谷重塑為故事開端 / Reframe Setbacks to Comebacks', S.key, S.desc);
-            console.log('%cblossom.neon()%c       - 投射王家衛電影感黃河路琥珀霓虹氛圍 / Engage Cinematic 90s Neon Glow', S.key, S.desc);
-            console.log('%cblossom.matrix()%c     - 查看成功三維度矩陣（心態、行動、慶祝） / View Self-Actualization Matrix', S.key, S.desc);
-            return '請在下方輸入上述任意指令，體驗專屬預祝賦能。 / Type any command above to trigger.';
+            console.log('%c[ CELEBRATE SUITE // 經典賦能與預祝指令集 ]', S.banner);
+            console.log('%ccelebrate.dock()%c       - 汪小姐「碼頭法則」：走出27號，做自己的靠山 / Declare Self-Reliance', S.key, S.desc);
+            console.log('%ccelebrate.toast()%c      - 魏總「八十八道霸王別姬」：未贏先慶祝，燃點心頭之火 / Pre-celebrate Audaciously', S.key, S.desc);
+            console.log('%ccelebrate.reframe()%c    - 逆境破局心法：將當前挫折重塑為傳奇起點 / Reframe Setbacks to Comebacks', S.key, S.desc);
+            console.log('%ccelebrate.neon()%c       - 投射 90 年代黃河路琥珀霓虹光影 / Engage Cinematic 90s Neon Glow', S.key, S.desc);
+            console.log('%ccelebrate.matrix()%c     - 查看成功三階路徑（敢想、踏實、豪邁） / View The Path to Triumph', S.key, S.desc);
+            return '請在下方輸入上述任一指令，體驗心靈賦能。 / Type any command above to trigger.';
         },
 
         dock: function () {
-            console.log('%c[ ⚓ THE DOCK PROTOCOL // 我是我自己的碼頭 ]', 'background:' + C.gold + '; color:#000; font-weight:900; font-size:12px; padding:3px 8px; font-family:' + FONT);
+            console.log('%c[ ⚓ THE DOCK PROTOCOL // 走出27號・我是我自己的碼頭 ]', 'background:' + C.gold + '; color:#000; font-weight:900; font-size:12px; padding:3px 8px; font-family:' + FONT);
             console.log('');
-            console.log('%c「心裡有底氣，腳下就有根。\n真正的碼頭不是別人施捨的平台或頭銜，而是你在泥濘裡打滾後，依舊能親手撐起的明珠招牌。」', 'color:' + C.gold + '; font-size:12px; line-height:1.8; font-weight:bold;');
+            console.log('%c「頭銜是27號借你的，招牌是自己打下來的！\n脫下高跟鞋，踩進工廠泥水裡摸爬滾打，吃得起苦、吞得下委屈。\n我汪明珠不需要誰作靠山——我自己就是我自己的碼頭！」', 'color:' + C.gold + '; font-size:12px; line-height:1.9; font-weight:bold;');
             console.log('');
-            console.log('%c[EN] "I am my own harbor. My worth is never granted by patrons, but built with my own hands and resilient resolve."', 'color:' + C.subText + '; font-style:italic;');
-            return '目標已錨定。無畏風雨，自己做主。';
+            console.log('%c[EN] "Prestigious titles are merely borrowed shine; your own harbor is built with grit and bare hands. Step out of comfort, fear no storm—you are your own sovereign anchor."', 'color:' + C.subText + '; font-style:italic;');
+            return '底氣在胸，腳下有路。做自己的靠山。';
         },
 
         toast: function () {
             console.log('%c[ 🥂 WEI\'S AUDACIOUS TOAST // 八十八道霸王別姬・未贏先賀 ]', 'background:' + C.neonRose + '; color:#FFF; font-weight:900; font-size:12px; padding:3px 8px; font-family:' + FONT);
             console.log('');
-            console.log('%c「大張旗鼓不是狂妄，而是對自己必定成功的絕對篤定！\n只要心頭火不滅，就算騎著破單車送貨，也是整個黃河路上最有派頭的人！」', 'color:' + C.neonRose + '; font-size:12px; line-height:1.8; font-weight:bold;');
+            console.log('%c「八十八道霸王別姬擺開！大張旗鼓、未贏先賀，不是狂妄，是對勝利有絕對篤定的信念！\n只要心頭火不滅，就算騎著舊單車冒雨送貨，也是整條黃河路上最有派頭的老闆！\n記住：經常慶功，就能成功！」', 'color:' + C.neonRose + '; font-size:12px; line-height:1.9; font-weight:bold;');
             console.log('');
-            console.log('%c[EN] "Pre-celebrate with sheer audacity! When your inner fire blazes, humble beginnings are merely the prelude to triumph."', 'color:' + C.subText + '; font-style:italic;');
-            
-            // 同時觸發主應用的撒花慶祝特效
+            console.log('%c[EN] "Eighty-eight grand dishes laid out! Pre-celebrate with unyielding audacity! When the fire in your belly burns bright, modest beginnings are just prelude. Celebrate every step—for celebration summons victory!"', 'color:' + C.subText + '; font-style:italic;');
+
             if (typeof window.fireConfetti === 'function') {
                 window.fireConfetti();
             }
 
-            return '香檳已開，信心滿格！今日預祝，明日必成！';
+            return '八十八道霸王別姬開席，信心滿載！經常慶功，就能成功！🎉';
         },
 
         reframe: function () {
@@ -202,37 +198,40 @@
                 '┌───────────────────────┬───────────────────────┬────────────────────────┐',
                 '│ 眼前困境 (Obstacle)   │ 心理重塑 (Mental Flip)│ 預祝成果 (Celebration) │',
                 '├───────────────────────┼───────────────────────┼────────────────────────┤',
-                '│ 別人的輕視與冷嘲熱諷  │ 褪去光環、淬鍊實力之時│ 證明自己的獨立勝券     │',
-                '│ 資源匱乏、白手起家    │ 毫無包袱、放手一搏之機│ 打造屬於自己的傳奇     │',
-                '│ 挫折失敗、訂單落空    │ 避開致命暗礁的幸運伏筆│ 迎來規模更大的成功機遇 │',
+                '│ 跌入低谷、走出27號    │ 撕去光環、自立自強起步│ 贏回尊嚴，做自己的碼頭 │',
+                '│ 資源短缺、白手空拳起家│ 毫無包袱、放手一搏良機│ 親手打造屬於自己的招牌 │',
+                '│ 諸暨風雨、訂單橫生波折│ 淬鍊筋骨的傳奇伏筆    │ 迎來翻倍突破的盛大勝券 │',
                 '└───────────────────────┴───────────────────────┴────────────────────────┘'
             ].join('\n');
 
             console.log('%c[ 🧱 CRISIS REFRAME MATRIX // 逆境轉化矩陣 ]', S.banner);
             console.log('%c' + matrix, S.scriptPanel);
-            return '「把絆腳的石頭，鋪成通往羅馬的大道。」';
+            return '「把絆腳的石塊，鋪成金碧輝煌的紅毯。」';
         },
 
         matrix: function () {
             console.log('%c[ 📈 THE PATH TO TRIUMPH // 邁向成功的三階火箭 ]', S.banner);
-            console.log('1. 敢想敢祝 (Anticipation)  : 以完成式心態宣告目標，釋放多巴胺，調降威脅認知。');
-            console.log('2. 踏實自立 (Action Ground)  : 像汪小姐在工廠點算零件般精準專注，鍛造硬核實力。');
-            console.log('3. 豪邁慶祝 (Celebration)    : 像魏總擺席般為每一個小進步喝采，持之以恆，終成大局。');
-            return '經常慶功，就會成功。';
+            console.log('1. 敢想敢祝 (Anticipation)  : 用已完成式宣告目標，驅散焦慮，啟動勝利潛意識。');
+            console.log('2. 踏實扎根 (Action Ground)  : 像汪小姐在工廠點數零件般專注執著，鍛造不可取代的真本領。');
+            console.log('3. 豪邁慶祝 (Celebration)    : 像魏總擺席般為每個微小前進喝采——經常慶功，就能成功！');
+            return '「經常慶功，就能成功。」';
         },
 
         neon: function () {
             triggerCinematicGaze();
-            return '黃河路琥珀霓虹氛圍加載中... 感受九十年代的昂揚生命力！';
+            return '黃河路琥珀霓虹光影已投射。祝你的每一步，都走得生機盎然！';
         }
     });
 
-    // 啟動加載
+    // 同步暴露 celebrate 與 blossom，確保兩種指令呼叫均能運作
+    window.celebrate = api;
+    window.blossom = api;
+
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(renderBlossomsHeader, 350);
+        setTimeout(renderConsoleHeader, 350);
     } else {
         window.addEventListener('DOMContentLoaded', function () {
-            setTimeout(renderBlossomsHeader, 350);
+            setTimeout(renderConsoleHeader, 350);
         });
     }
 })();
