@@ -1,10 +1,10 @@
 /**
  * Service Worker for Always Celebrate (常慶功)
- * Enterprise Offline Cache (v2.1.0)
+ * Enterprise Offline Cache (v2.2.0)
  * Pure Client-Side • Zero Data Retention • Offline-First
  */
 
-const CACHE_NAME = 'always-celebrate-v2.1.0';
+const CACHE_NAME = 'always-celebrate-v2.2.0';
 
 const ASSETS_TO_CACHE = [
   './',
