@@ -12,7 +12,7 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './AlwaysCelebrate-192.png',
   './AlwaysCelebrate-512.png',
-  './js/blossoms.js'
+  './js/celebrate.js'
 ];
 
 // 安裝階段：快取所有核心靜態資源
