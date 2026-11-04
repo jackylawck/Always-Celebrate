@@ -129,7 +129,7 @@
 
         console.log('%c' + manifest, S.scriptPanel);
         console.log('');
-        console.log('%c💡 終端互動指令: 輸入 celebrate.help() 或 blossom.help() 開啟專屬賦能指南 / Type celebrate.help()', S.cliBar);
+        console.log('%c💡 終端互動指令: 輸入 celebrate.help() 開啟專屬賦能指南 / Type celebrate.help()', S.cliBar);
     }
 
     function triggerCinematicGaze() {
@@ -223,9 +223,8 @@
         }
     });
 
-    // 同步暴露 celebrate 與 blossom，確保兩種指令呼叫均能運作
+    // 僅暴露 celebrate 指令集
     window.celebrate = api;
-    window.blossom = api;
 
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         setTimeout(renderConsoleHeader, 350);
