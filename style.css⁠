@@ -1,21 +1,37 @@
 /**
  * 常慶功 Always Celebrate - Master Design System & Stylesheet (v2.1.0 Textbook Grade)
+ * 繁花朝陽色系：晨曦金芒、暖焦糖木、溫潤象牙白
  * Responsive, Accessible, Print-Ready & Variable-Driven
  */
 
 :root {
-    /* 🎨 色彩與陰影變數 Tokens */
-    --bg-color: #0b0f19;
-    --card-bg: #151c2c;
-    --card-border: #2c3e50;
-    --accent-gold: #f39c12;
-    --accent-gold-hover: #d35400;
-    --danger-color: #e74c3c;
-    --success-color: #2ecc71;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --input-bg: #070a12;
-    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.25);
+    /* 🎨 繁花朝陽色階系統 (Sunshine Amber & Warm Caramel Tokens) */
+    --bg-color: #140d07;
+    --bg-gradient: radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.22) 0%, rgba(20, 13, 7, 1) 75%);
+    --card-bg: #20150b;
+    --card-border: #422d17;
+    --card-border-glow: #6e481f;
+    --input-bg: #0d0804;
+
+    /* ☀️ 金陽光譜 (Sunlight Amber Spectrum) */
+    --accent-gold: #f59e0b;
+    --accent-gold-light: #fbbf24;
+    --accent-gold-sun: #ffd166;
+    --accent-gold-hover: #d97706;
+    --gold-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%);
+    --gold-gradient-hover: linear-gradient(135deg, #fcd34d 0%, #fbbf24 55%, #f59e0b 100%);
+
+    /* 🌺 輔色：霞光紅、翡翠青與暖陽柔光 */
+    --danger-color: #f43f5e;
+    --success-color: #10b981;
+    --sun-warmth: rgba(245, 158, 11, 0.12);
+
+    /* 📜 文本色階：象牙陽光白與羊皮紙暖調 */
+    --text-primary: #fffbeb;
+    --text-secondary: #d4c5b3;
+
+    /* 🌫️ 氛圍陰影 */
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(245, 158, 11, 0.08);
 
     /* 📏 字體尺度 Font Scale */
     --font-xs: 0.75rem;
@@ -23,8 +39,8 @@
     --font-base: 0.95rem;
     --font-md: 1rem;
     --font-lg: 1.25rem;
-    --font-xl: 1.6rem;
-    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-xl: 1.65rem;
+    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
 
     /* 📐 間距尺度 Spacing Tokens */
     --space-1: 0.25rem;
@@ -52,6 +68,8 @@
 
 body {
     background-color: var(--bg-color);
+    background-image: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: var(--font-stack);
     line-height: 1.6;
@@ -66,13 +84,14 @@ body {
     position: absolute;
     top: -60px;
     left: 20px;
-    background: var(--accent-gold);
-    color: #ffffff;
+    background: var(--gold-gradient);
+    color: #140d07;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-sm);
     z-index: 10001;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
     transition: top var(--transition-fast);
 }
 
@@ -109,22 +128,25 @@ body {
 
 .app-title { 
     font-size: var(--font-xl); 
-    font-weight: 700; 
+    font-weight: 800; 
     color: var(--text-primary); 
     line-height: 1.2;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
 }
 
 .app-slogan { 
     font-size: var(--font-sm); 
-    color: var(--accent-gold); 
+    color: var(--accent-gold-light); 
     margin-top: var(--space-1); 
+    font-weight: 500;
 }
 
 /* 語言切換 Switcher */
 .lang-switch-group {
     display: flex;
     gap: var(--space-1);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(32, 21, 11, 0.8);
     padding: var(--space-1);
     border-radius: var(--radius-sm);
     border: 1px solid var(--card-border);
@@ -138,13 +160,14 @@ body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: var(--font-xs);
-    transition: background var(--transition-fast), color var(--transition-fast);
+    font-weight: 600;
+    transition: all var(--transition-fast);
 }
 
 .lang-btn.active {
-    background: var(--accent-gold);
-    color: #ffffff;
-    font-weight: 600;
+    background: var(--gold-gradient);
+    color: #140d07;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
 
 /* 卡片與容器 Cards */
@@ -155,31 +178,34 @@ body {
     padding: var(--space-6);
     margin-bottom: var(--space-5);
     box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
 }
 
 /* 說明指南導引盒 Guide Boxes */
 .guide-box {
-    background: rgba(243, 156, 18, 0.08);
-    border: 1px solid rgba(243, 156, 18, 0.25);
+    background: var(--sun-warmth);
+    border: 1px solid rgba(245, 158, 11, 0.35);
     border-radius: var(--radius-md);
-    padding: var(--space-4) var(--space-4);
+    padding: var(--space-4);
     margin-bottom: var(--space-4);
     font-size: var(--font-sm);
+    box-shadow: inset 0 0 16px rgba(245, 158, 11, 0.05);
 }
 
 .guide-box-success {
-    background: rgba(46, 204, 113, 0.08);
-    border-color: rgba(46, 204, 113, 0.25);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.35);
 }
 
 .guide-title { 
-    font-weight: 600; 
-    color: var(--accent-gold); 
+    font-weight: 700; 
+    color: var(--accent-gold-sun); 
     margin-bottom: var(--space-2); 
     font-size: var(--font-base); 
+    letter-spacing: 0.5px;
 }
 
-.text-success { color: var(--success-color); }
+.text-success { color: #34d399; }
 .guide-list { padding-left: var(--space-5); color: var(--text-secondary); }
 .guide-list li { margin-bottom: var(--space-2); }
 .guide-list li:last-child { margin-bottom: 0; }
@@ -204,14 +230,15 @@ body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: var(--font-sm);
+    font-weight: 600;
     text-align: center;
     transition: all var(--transition-fast);
 }
 
 .tab-btn.active {
-    background: var(--card-bg);
-    color: var(--accent-gold);
-    font-weight: 600;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-gold-sun);
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 /* 表單與輸入控制 Forms */
@@ -231,11 +258,12 @@ select {
     font-size: var(--font-base);
     font-family: inherit;
     outline: none;
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input:focus, textarea:focus, select:focus { 
     border-color: var(--accent-gold); 
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
 }
 
 textarea { 
@@ -245,12 +273,13 @@ textarea {
 
 /* 密碼強度計 UI */
 .strength-bar-wrapper {
-    height: 4px;
+    height: 5px;
     background: var(--input-bg);
-    border-radius: 2px;
+    border-radius: 3px;
     margin-top: -8px;
     margin-bottom: var(--space-3);
     overflow: hidden;
+    border: 1px solid rgba(66, 45, 23, 0.5);
 }
 
 .strength-bar {
@@ -264,40 +293,53 @@ textarea {
     font-size: var(--font-sm);
     margin-top: -8px;
     margin-bottom: var(--space-3);
+    font-weight: 500;
 }
 
 /* 按鈕系統 Buttons & Interactions */
 .btn-primary {
-    background: var(--accent-gold);
-    color: #ffffff;
+    background: var(--gold-gradient);
+    color: #140d07;
     border: none;
-    padding: var(--space-3) var(--space-5);
+    padding: 13px var(--space-5);
     border-radius: var(--radius-md);
     cursor: pointer;
     font-size: var(--font-md);
-    font-weight: 600;
+    font-weight: 700;
     width: 100%;
-    transition: background var(--transition-fast), opacity var(--transition-fast);
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+    transition: transform 0.1s ease, box-shadow var(--transition-fast);
 }
 
-.btn-primary:hover { background: var(--accent-gold-hover); }
+.btn-primary:hover { 
+    background: var(--gold-gradient-hover); 
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.btn-primary:active { 
+    transform: translateY(1px); 
+}
 
 .btn-secondary {
-    background: #1e293b;
+    background: #2b1c0f;
     color: var(--text-primary);
     border: 1px solid var(--card-border);
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: var(--font-sm);
-    font-weight: 500;
-    transition: background var(--transition-fast);
+    font-weight: 600;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
-.btn-secondary:hover { background: #334155; }
-.btn-sm { padding: 4px 10px; font-size: var(--font-xs); }
+.btn-secondary:hover { 
+    background: #3b2816; 
+    border-color: var(--accent-gold);
+}
 
-/* 禁用狀態 Disabled States */
+.btn-sm { padding: 5px 12px; font-size: var(--font-xs); }
+
 button:disabled, input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -315,7 +357,7 @@ button:disabled, input:disabled {
 
 .status-text { 
     font-size: var(--font-sm); 
-    color: var(--success-color); 
+    color: #34d399; 
     font-weight: 600; 
 }
 
@@ -340,15 +382,17 @@ button:disabled, input:disabled {
 .modal-box {
     margin-top: var(--space-4);
     padding: var(--space-4);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--accent-gold-hover);
     border-radius: var(--radius-md);
     background: var(--input-bg);
+    box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.08);
 }
 
 .modal-title { 
-    color: var(--accent-gold); 
+    color: var(--accent-gold-sun); 
     margin-bottom: var(--space-3); 
     font-size: var(--font-base); 
+    font-weight: 700;
 }
 
 .btn-group-row { 
@@ -375,15 +419,22 @@ button:disabled, input:disabled {
     background: var(--input-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-sm);
-    padding: var(--space-3);
+    padding: var(--space-4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: border-color var(--transition-fast);
+}
+
+.entry-item:hover { 
+    border-color: var(--accent-gold); 
 }
 
 .entry-header {
     display: flex;
     justify-content: space-between;
     font-size: var(--font-sm);
-    color: var(--accent-gold);
+    color: var(--accent-gold-sun);
     margin-bottom: var(--space-1);
+    font-weight: 600;
 }
 
 #confetti-canvas {
@@ -398,7 +449,7 @@ button:disabled, input:disabled {
 @media (max-width: 600px) {
     body { padding: var(--space-3); }
     .header-section { flex-direction: column; align-items: stretch; gap: var(--space-3); }
-    .app-title { font-size: 1.35rem; }
+    .app-title { font-size: 1.4rem; }
     .backup-controls button { min-width: auto; flex: 1 0 45%; }
     .btn-primary, .btn-secondary { font-size: var(--font-sm); padding: var(--space-3); }
     .entry-header { flex-direction: column; gap: var(--space-1); }
